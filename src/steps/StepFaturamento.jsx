@@ -104,9 +104,21 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
   const changeAliquota = (id, value) =>
     updateData('canais', canais.map(c => c.id === id ? { ...c, aliquota: value } : c))
 
+  const faturamentoMesTotal = (mesIdx) =>
+    canais.reduce((s, c) => s + (Number(c.meses?.[mesIdx]) || 0), 0)
+
   const changeDevolucao = (mesIdx, valor) => {
     const devolucao = [...(data.devolucao || Array(12).fill(0))]
     devolucao[mesIdx] = valor
+    updateData('devolucao', devolucao)
+  }
+
+  const changeDeducaoDevolucao = (value) => {
+    const pct = Number(value) || 0
+    const devolucao = visibleMeses.map(mesIdx =>
+      Math.round(faturamentoMesTotal(mesIdx) * pct / 100)
+    )
+    updateData('deducaoDevolucao', value)
     updateData('devolucao', devolucao)
   }
 
@@ -273,6 +285,70 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
         </div>
       )}
 
+      {/* Devolução table */}
+      <>
+        <div className="text-center mb-4 mt-10">
+          <div className="text-3xl mb-2">↩️</div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-1">Devolução</h2>
+          <p className="text-slate-500 text-sm">Informe a % de devolução sobre o faturamento mensal</p>
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white mb-4">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-slate-100 text-slate-700 text-xs">
+                <th className="text-left px-3 py-2.5 font-semibold sticky left-0 bg-blue-600 z-10 min-w-[160px] border-r border-blue-500 text-white">
+                  Devolução
+                </th>
+                <th className="text-center px-2 py-2.5 font-semibold min-w-[100px] border-r border-blue-500 text-white bg-blue-600">
+                  %
+                </th>
+                {visibleMeses.map((i, col) => (
+                  <th
+                    key={i}
+                    className={`text-center px-1 py-2.5 font-semibold min-w-[120px] bg-blue-600 text-white ${
+                      col < visibleMeses.length - 1 ? 'border-r border-blue-500' : ''
+                    }`}
+                  >
+                    {MESES_FULL[i]}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-t border-slate-200 bg-slate-50/50 hover:bg-slate-100 transition">
+                <td className="px-2 py-1.5 sticky left-0 bg-inherit z-10 border-r border-slate-200">
+                  <span className="text-xs font-medium text-slate-700">Total do Ano</span>
+                </td>
+                <td className="px-2 py-1.5 border-r border-slate-200">
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0" max="100" step="0.5"
+                      value={data.deducaoDevolucao || '0'}
+                      onChange={e => changeDeducaoDevolucao(e.target.value)}
+                      className="w-full bg-transparent border border-transparent hover:border-slate-200 focus:border-blue-500 focus:bg-slate-100 rounded px-2 pr-5 py-1 text-slate-900 text-xs text-center focus:outline-none transition"
+                    />
+                    <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">%</span>
+                  </div>
+                </td>
+                {visibleMeses.map((mesIdx, col) => (
+                  <td
+                    key={mesIdx}
+                    className={`px-1 py-1 ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
+                  >
+                    <MoneyCell
+                      value={data.devolucao?.[mesIdx] || 0}
+                      onChange={v => changeDevolucao(mesIdx, v)}
+                    />
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </>
+
       {/* Impostos table */}
       {canais.length > 0 && (
         <>
@@ -340,55 +416,6 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
           </div>
         </>
       )}
-
-      {/* Devolução table */}
-      <>
-        <div className="text-center mb-4 mt-10">
-          <div className="text-3xl mb-2">↩️</div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-1">Devolução</h2>
-          <p className="text-slate-500 text-sm">Preencha o valor estimado de devolução por mês</p>
-        </div>
-
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white mb-4">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-slate-100 text-slate-700 text-xs">
-                <th className="text-left px-3 py-2.5 font-semibold sticky left-0 bg-blue-600 z-10 min-w-[160px] border-r border-blue-500 text-white">
-                  Devolução
-                </th>
-                {visibleMeses.map((i, col) => (
-                  <th
-                    key={i}
-                    className={`text-center px-1 py-2.5 font-semibold min-w-[120px] bg-blue-600 text-white ${
-                      col < visibleMeses.length - 1 ? 'border-r border-blue-500' : ''
-                    }`}
-                  >
-                    {MESES_FULL[i]}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-t border-slate-200 bg-slate-50/50 hover:bg-slate-100 transition">
-                <td className="px-2 py-1.5 sticky left-0 bg-inherit z-10 border-r border-slate-200">
-                  <span className="text-xs font-medium text-slate-700">Total do Ano</span>
-                </td>
-                {visibleMeses.map((mesIdx, col) => (
-                  <td
-                    key={mesIdx}
-                    className={`px-1 py-1 ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
-                  >
-                    <MoneyCell
-                      value={data.devolucao?.[mesIdx] || 0}
-                      onChange={v => changeDevolucao(mesIdx, v)}
-                    />
-                  </td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </>
 
       {/* Navigation */}
       <div className="flex gap-3 mt-5 max-w-lg mx-auto">
