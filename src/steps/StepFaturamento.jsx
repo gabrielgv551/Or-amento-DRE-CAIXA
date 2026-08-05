@@ -146,6 +146,12 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
   const rolMes = (mesIdx) =>
     faturamentoTotalMes(mesIdx) - (data.devolucao?.[mesIdx] || 0) - impostoTotalMes(mesIdx)
 
+  const rolPctMes = (mesIdx) => {
+    const fb = faturamentoTotalMes(mesIdx)
+    if (fb <= 0) return 0
+    return Math.round((rolMes(mesIdx) / fb) * 1000) / 10
+  }
+
   return (
     <div className={`w-full max-w-[98vw] px-2 ${className}`}>
       {/* Header */}
@@ -463,6 +469,7 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                   { label: '(-) Devoluções', color: 'text-red-600', fn: (i) => data.devolucao?.[i] || 0, negative: true },
                   { label: '(-) Impostos', color: 'text-red-600', fn: impostoTotalMes, negative: true },
                   { label: '(=) ROL', color: 'text-emerald-700 font-semibold', fn: rolMes },
+                  { label: 'ROL %', color: 'text-blue-700 font-semibold', fn: rolPctMes, suffix: '%' },
                 ].map((row, rowIdx) => (
                   <tr
                     key={row.label}
@@ -478,7 +485,7 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                           key={mesIdx}
                           className={`px-1 py-1 text-center text-xs ${row.color} ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
                         >
-                          {row.negative ? '-' : ''}{fmtBRL(value)}
+                          {row.negative ? '-' : ''}{row.suffix ? `${value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}${row.suffix}` : fmtBRL(value)}
                         </td>
                       )
                     })}
