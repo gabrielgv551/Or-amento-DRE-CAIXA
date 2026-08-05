@@ -16,6 +16,7 @@ const emptyCanal = (nome = '', deducao = '0', leadTime = '14') => ({
   nome,
   deducao,
   leadTime,
+  aliquota: '0',
   meses: Array(12).fill(0),
 })
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import StepWelcome from './steps/StepWelcome'
 import StepFaturamento from './steps/StepFaturamento'
+import StepImpostos from './steps/StepImpostos'
 import StepFornecedores from './steps/StepFornecedores'
 import StepPessoal from './steps/StepPessoal'
 import StepOutros from './steps/StepOutros'
@@ -15,6 +16,7 @@ import { loadStorage, saveStorage } from './utils/storage'
 const STEPS = [
   'Boas-vindas',
   'Faturamento',
+  'Impostos',
   'Fornecedores',
   'Pessoal',
   'Outros',
@@ -90,6 +92,7 @@ export default function App() {
   const stepComponents = [
     <StepWelcome key={animKey} className={stepClass} {...stepProps} />,
     <StepFaturamento key={animKey} className={stepClass} {...stepProps} />,
+    <StepImpostos key={animKey} className={stepClass} {...stepProps} />,
     <StepFornecedores key={animKey} className={stepClass} {...stepProps} />,
     <StepPessoal key={animKey} className={stepClass} {...stepProps} />,
     <StepOutros key={animKey} className={stepClass} {...stepProps} />,

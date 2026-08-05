@@ -167,6 +167,37 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
     }
   })
 
+  // ─── Pré-computa impostos por dia ───────────────────────────────────────────
+  const impostosPag = {}
+  for (let i = 1; i <= diasNoMes; i++) impostosPag[i] = []
+
+  canais.forEach(canal => {
+    const nome     = canal.nome || 'Canal'
+    const aliquota = (Number(canal.aliquota) || 0) / 100
+    if (aliquota <= 0) return
+
+    const vendaBruta = (() => {
+      if (Array.isArray(canal.meses)) return Number(canal.meses[mesAtual]) || 0
+      const vals = [
+        Number(canal.mes1?.valor) || 0,
+        Number(canal.mes2?.valor) || 0,
+        Number(canal.mes3?.valor) || 0,
+      ].filter(v => v > 0)
+      return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0
+    })()
+
+    if (vendaBruta <= 0) return
+
+    const impostoMensal = vendaBruta * aliquota
+    const diasU = diasUteisMes(anoAtual, mesAtual)
+    if (diasU.length === 0) return
+
+    const impostoDiario = impostoMensal / diasU.length
+    diasU.forEach(dia => {
+      impostosPag[dia.getDate()].push({ descricao: `Imposto ${nome}`, valor: impostoDiario })
+    })
+  })
+
   // ─── Pré-computa pagamentos de fornecedores por dia ─────────────────────────
   const fornecPag = {}
   for (let i = 1; i <= diasNoMes; i++) fornecPag[i] = []
@@ -195,7 +226,7 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
   for (let d = 1; d <= diasNoMes; d++) {
     const saldoInicialDia = saldoAcumulado
     const entradas = [...entregas[d]]
-    const saidas   = [...(fornecPag[d] || [])]
+    const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || [])]
 
     data.dividas?.forEach(div => {
       if (Number(div.diaVencimento) === d && Number(div.parcela) > 0) {
