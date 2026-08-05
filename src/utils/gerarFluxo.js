@@ -198,6 +198,21 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
     })
   })
 
+  // ─── Pré-computa devoluções por dia ─────────────────────────────────────────
+  const devolucaoPag = {}
+  for (let i = 1; i <= diasNoMes; i++) devolucaoPag[i] = []
+
+  const devolucaoMes = Number(data.devolucao?.[mesAtual]) || 0
+  if (devolucaoMes > 0) {
+    const diasU = diasUteisMes(anoAtual, mesAtual)
+    if (diasU.length > 0) {
+      const devolucaoDiaria = devolucaoMes / diasU.length
+      diasU.forEach(dia => {
+        devolucaoPag[dia.getDate()].push({ descricao: 'Devolução', valor: devolucaoDiaria })
+      })
+    }
+  }
+
   // ─── Pré-computa pagamentos de fornecedores por dia ─────────────────────────
   const fornecPag = {}
   for (let i = 1; i <= diasNoMes; i++) fornecPag[i] = []
@@ -226,7 +241,7 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
   for (let d = 1; d <= diasNoMes; d++) {
     const saldoInicialDia = saldoAcumulado
     const entradas = [...entregas[d]]
-    const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || [])]
+    const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || []), ...(devolucaoPag[d] || [])]
 
     data.dividas?.forEach(div => {
       if (Number(div.diaVencimento) === d && Number(div.parcela) > 0) {

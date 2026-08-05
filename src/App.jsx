@@ -25,6 +25,7 @@ const STEPS = [
 const initialData = {
   saldoInicial: '',
   canais: [],
+  devolucao: Array(12).fill(0),
   fornecedores: [],
   dividas: [],
   pessoal: { total: '', diaPagamento: '5' },
