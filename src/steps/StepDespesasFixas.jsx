@@ -62,6 +62,7 @@ function MoneyCell({ value, onChange }) {
 
 export default function StepDespesasFixas({ data, updateData, next, back, className }) {
   const despesas = data.despesasFixas || []
+  const getMeses = (d) => Array.isArray(d.meses) ? d.meses : Array(12).fill(0)
 
   const add = (nome = '') => updateData('despesasFixas', [...despesas, emptyDespesa(nome)])
   const remove = (id) => updateData('despesasFixas', despesas.filter(d => d.id !== id))
@@ -71,7 +72,7 @@ export default function StepDespesasFixas({ data, updateData, next, back, classN
   const changeMes = (id, mesIdx, valor) =>
     updateData('despesasFixas', despesas.map(d => {
       if (d.id !== id) return d
-      const meses = [...d.meses]
+      const meses = [...getMeses(d)]
       meses[mesIdx] = valor
       return { ...d, meses }
     }))
@@ -83,8 +84,8 @@ export default function StepDespesasFixas({ data, updateData, next, back, classN
     updateData('despesasFixas', despesas.map(d => d.id === id ? { ...d, meses } : d))
   }
 
-  const totalAno = (d) => d.meses.reduce((s, v) => s + (Number(v) || 0), 0)
-  const totalMes = (mesIdx) => despesas.reduce((s, d) => s + (Number(d.meses?.[mesIdx]) || 0), 0)
+  const totalAno = (d) => getMeses(d).reduce((s, v) => s + (Number(v) || 0), 0)
+  const totalMes = (mesIdx) => despesas.reduce((s, d) => s + (Number(getMeses(d)[mesIdx]) || 0), 0)
   const totalGeral = () => despesas.reduce((s, d) => s + totalAno(d), 0)
 
   const jaAdicionado = (nome) => despesas.some(d => d.nome === nome)
@@ -171,7 +172,7 @@ export default function StepDespesasFixas({ data, updateData, next, back, classN
                     onChange={v => changeTotalAno(d.id, v)}
                   />
                 </td>
-                {d.meses.map((v, i) => (
+                {getMeses(d).map((v, i) => (
                   <td
                     key={i}
                     className={`px-1 py-1 ${i < 11 ? 'border-r border-slate-200/50' : ''}`}

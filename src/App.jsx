@@ -38,10 +38,22 @@ const initialData = {
   despesasFixas: [],
 }
 
+function normalizeData(raw) {
+  const data = { ...initialData, ...(raw || {}) }
+  data.despesasFixas = (data.despesasFixas || []).map(d => ({
+    ...d,
+    meses: Array.isArray(d.meses) ? d.meses : Array(12).fill(0),
+  }))
+  return data
+}
+
 export default function App() {
-  const [step, setStep] = useState(() => loadStorage('epfc_step', 0))
+  const [step, setStep] = useState(() => {
+    const saved = loadStorage('epfc_step', 0)
+    return Number(saved) >= 0 && Number(saved) < STEPS.length ? Number(saved) : 0
+  })
   const [direction, setDirection] = useState('right')
-  const [data, setData] = useState(() => loadStorage('epfc_data', initialData))
+  const [data, setData] = useState(() => normalizeData(loadStorage('epfc_data', initialData)))
   const [animKey, setAnimKey] = useState(0)
   const [mode, setMode] = useState(() => loadStorage('epfc_mode', 'fluxo'))
 
