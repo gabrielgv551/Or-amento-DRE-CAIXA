@@ -10,9 +10,9 @@ export default function StepWelcome({ next, setMode, className }) {
       <div className="w-16 h-0.5 bg-blue-500 rounded-full mx-auto mb-6" />
 
       <h1 className="text-4xl font-extrabold text-slate-900 mb-3 leading-tight">
-        Simulador de<br />
+        Orçamento de<br />
         <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-          Fluxo de Caixa
+          DRE / Caixa
         </span>
       </h1>
       <p className="text-slate-500 text-lg mb-3">
