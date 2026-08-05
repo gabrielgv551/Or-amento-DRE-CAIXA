@@ -137,6 +137,15 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
     return Math.round(faturamento * aliquota)
   }
 
+  const faturamentoTotalMes = (mesIdx) =>
+    canais.reduce((s, c) => s + (Number(c.meses?.[mesIdx]) || 0), 0)
+
+  const impostoTotalMes = (mesIdx) =>
+    canais.reduce((s, c) => s + impostoMes(c, mesIdx), 0)
+
+  const rolMes = (mesIdx) =>
+    faturamentoTotalMes(mesIdx) - (data.devolucao?.[mesIdx] || 0) - impostoTotalMes(mesIdx)
+
   return (
     <div className={`w-full max-w-[98vw] px-2 ${className}`}>
       {/* Header */}
@@ -412,6 +421,67 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                         -{fmtBRL(impostoMes(canal, mesIdx))}
                       </td>
                     ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {/* ROL table */}
+      {canais.length > 0 && (
+        <>
+          <div className="text-center mb-4 mt-10">
+            <div className="text-3xl mb-2">📈</div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-1">ROL</h2>
+            <p className="text-slate-500 text-sm">Receita Operacional Líquida por mês</p>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white mb-4">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-slate-100 text-slate-700 text-xs">
+                  <th className="text-left px-3 py-2.5 font-semibold sticky left-0 bg-blue-600 z-10 min-w-[180px] border-r border-blue-500 text-white">
+                    ROL
+                  </th>
+                  {visibleMeses.map((i, col) => (
+                    <th
+                      key={i}
+                      className={`text-center px-1 py-2.5 font-semibold min-w-[120px] bg-blue-600 text-white ${
+                        col < visibleMeses.length - 1 ? 'border-r border-blue-500' : ''
+                      }`}
+                    >
+                      {MESES_FULL[i]}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { label: 'Faturamento Bruto', color: 'text-slate-700', fn: faturamentoTotalMes },
+                  { label: '(-) Devoluções', color: 'text-red-600', fn: (i) => data.devolucao?.[i] || 0, negative: true },
+                  { label: '(-) Impostos', color: 'text-red-600', fn: impostoTotalMes, negative: true },
+                  { label: '(=) ROL', color: 'text-emerald-700 font-semibold', fn: rolMes },
+                ].map((row, rowIdx) => (
+                  <tr
+                    key={row.label}
+                    className={`border-t border-slate-200 ${rowIdx % 2 === 0 ? 'bg-slate-50/50' : 'bg-slate-50/30'} hover:bg-slate-100 transition`}
+                  >
+                    <td className="px-2 py-1.5 sticky left-0 bg-inherit z-10 border-r border-slate-200">
+                      <span className={`text-xs font-medium ${row.color}`}>{row.label}</span>
+                    </td>
+                    {visibleMeses.map((mesIdx, col) => {
+                      const value = row.fn(mesIdx)
+                      return (
+                        <td
+                          key={mesIdx}
+                          className={`px-1 py-1 text-center text-xs ${row.color} ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
+                        >
+                          {row.negative ? '-' : ''}{fmtBRL(value)}
+                        </td>
+                      )
+                    })}
                   </tr>
                 ))}
               </tbody>
