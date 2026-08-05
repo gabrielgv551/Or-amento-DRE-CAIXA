@@ -37,18 +37,12 @@ export default function StepWelcome({ next, setMode, className }) {
         ))}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 mb-8 w-full max-w-xl mx-auto">
+      <div className="grid gap-3 mb-8 w-full max-w-xl mx-auto">
         <button
           onClick={next}
           className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98]"
         >
           DRE / Caixa →
-        </button>
-        <button
-          onClick={() => setMode('margem')}
-          className="w-full bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 hover:border-blue-300 transition font-bold py-4 px-8 rounded-2xl text-lg"
-        >
-          Simulador de Margens
         </button>
       </div>
     </div>

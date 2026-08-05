@@ -111,30 +111,6 @@ export default function App() {
           >
             Simulador de Orçamento, DRE / Caixa
           </button>
-          <button
-            onClick={() => switchMode('margem')}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition ${mode === 'margem'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}
-          >
-            Simulador de Margens
-          </button>
-          <button
-            onClick={() => switchMode('dre')}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition ${mode === 'dre'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}
-          >
-            DRE Gerencial
-          </button>
-          <button
-            onClick={() => switchMode('pmv')}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition ${mode === 'pmv'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}
-          >
-            Simulador PMV
-          </button>
         </div>
         <div className="relative" ref={qrRef}>
           <button
