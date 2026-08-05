@@ -31,6 +31,12 @@ function fmtBRL(v) {
   return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 }
 
+function parsePct(value) {
+  const normalized = String(value).replace(',', '.').replace(/[^\d.]/g, '')
+  const n = parseFloat(normalized)
+  return isNaN(n) ? 0 : n
+}
+
 function MoneyCell({ value, onChange }) {
   const ref = useRef(null)
   const [editing, setEditing] = React.useState(false)
@@ -114,11 +120,11 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
   }
 
   const changeDeducaoDevolucao = (value) => {
-    const pct = Number(value) || 0
+    const pct = parsePct(value)
     const devolucao = visibleMeses.map(mesIdx =>
       Math.round(faturamentoMesTotal(mesIdx) * pct / 100)
     )
-    updateData('deducaoDevolucao', value)
+    updateData('deducaoDevolucao', String(pct).replace('.', ','))
     updateData('devolucao', devolucao)
   }
 
@@ -127,8 +133,8 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
 
   const impostoMes = (canal, mesIdx) => {
     const faturamento = Number(canal.meses?.[mesIdx]) || 0
-    const aliquota = Number(canal.aliquota) || 0
-    return Math.round(faturamento * aliquota / 100)
+    const aliquota = parsePct(canal.aliquota) / 100
+    return Math.round(faturamento * aliquota)
   }
 
   return (
@@ -222,8 +228,8 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                 <td className="px-2 py-1.5 border-r border-slate-200">
                   <div className="relative">
                     <input
-                      type="number"
-                      min="0" max="100" step="0.5"
+                      type="text"
+                      inputMode="decimal"
                       value={canal.deducao}
                       onChange={e => changeCanal(canal.id, 'deducao', e.target.value)}
                       className="w-full bg-transparent border border-transparent hover:border-slate-200 focus:border-blue-500 focus:bg-slate-100 rounded px-2 pr-5 py-1 text-slate-900 text-xs text-center focus:outline-none transition"
@@ -323,8 +329,8 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                 <td className="px-2 py-1.5 border-r border-slate-200">
                   <div className="relative">
                     <input
-                      type="number"
-                      min="0" max="100" step="0.5"
+                      type="text"
+                      inputMode="decimal"
                       value={data.deducaoDevolucao || '0'}
                       onChange={e => changeDeducaoDevolucao(e.target.value)}
                       className="w-full bg-transparent border border-transparent hover:border-slate-200 focus:border-blue-500 focus:bg-slate-100 rounded px-2 pr-5 py-1 text-slate-900 text-xs text-center focus:outline-none transition"
@@ -389,8 +395,8 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                     <td className="px-2 py-1.5 border-r border-slate-200">
                       <div className="relative">
                         <input
-                          type="number"
-                          min="0" max="100" step="0.5"
+                          type="text"
+                          inputMode="decimal"
                           value={canal.aliquota || '0'}
                           onChange={e => changeAliquota(canal.id, e.target.value)}
                           className="w-full bg-transparent border border-transparent hover:border-slate-200 focus:border-blue-500 focus:bg-slate-100 rounded px-2 pr-5 py-1 text-slate-900 text-xs text-center focus:outline-none transition"

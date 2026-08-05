@@ -105,9 +105,14 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
   const entregas = {}
   for (let i = 1; i <= diasNoMes; i++) entregas[i] = []
 
+  const parsePct = (v) => {
+    const n = parseFloat(String(v || '').replace(',', '.'))
+    return isNaN(n) ? 0 : n
+  }
+
   canais.forEach(canal => {
     const nome     = canal.nome || 'Canal'
-    const deducao  = (Number(canal.deducao) || 0) / 100
+    const deducao  = parsePct(canal.deducao) / 100
     const leadTime = Number(canal.leadTime) || 0
 
     // Resolve valor de venda bruta para um mês/ano específico
@@ -173,7 +178,7 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
 
   canais.forEach(canal => {
     const nome     = canal.nome || 'Canal'
-    const aliquota = (Number(canal.aliquota) || 0) / 100
+    const aliquota = parsePct(canal.aliquota) / 100
     if (aliquota <= 0) return
 
     const vendaBruta = (() => {
