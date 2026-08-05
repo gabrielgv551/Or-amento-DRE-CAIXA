@@ -32,7 +32,7 @@ const initialData = {
   pessoal: { total: '', diaPagamento: '5' },
   outros: [],
   naoOperacional: { entradas: [], saidas: [] },
-  despesasVariaveis: { ads: '', frete: '' },
+  despesasVariaveis: { ads: {}, frete: {}, comissao: {} },
 }
 
 export default function App() {

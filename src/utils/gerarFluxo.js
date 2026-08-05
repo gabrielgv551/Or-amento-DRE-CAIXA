@@ -218,28 +218,30 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
     }
   }
 
-  // ─── Pré-computa despesas variáveis (Ads e Frete) por dia ───────────────────
+  // ─── Pré-computa despesas variáveis (Ads, Frete e Comissão) por canal/dia ─────
   const despesasVariaveisPag = {}
   for (let i = 1; i <= diasNoMes; i++) despesasVariaveisPag[i] = []
 
   const dv = data.despesasVariaveis || {}
-  const adsPct = parsePct(dv.ads) / 100
-  const fretePct = parsePct(dv.frete) / 100
-  const rolMes = canais.reduce((s, c) => s + (Number(c.meses?.[mesAtual]) || 0), 0)
+  const mapTipo = { ads: 'Ads', frete: 'Frete', comissao: 'Comissão' }
 
-  if (rolMes > 0) {
-    const diasU = diasUteisMes(anoAtual, mesAtual)
-    if (diasU.length > 0) {
-      if (adsPct > 0) {
-        const adsDiario = (rolMes * adsPct) / diasU.length
-        diasU.forEach(dia => despesasVariaveisPag[dia.getDate()].push({ descricao: 'Ads', valor: adsDiario }))
-      }
-      if (fretePct > 0) {
-        const freteDiario = (rolMes * fretePct) / diasU.length
-        diasU.forEach(dia => despesasVariaveisPag[dia.getDate()].push({ descricao: 'Frete', valor: freteDiario }))
-      }
-    }
-  }
+  canais.forEach(canal => {
+    const nome = canal.nome || 'Canal'
+    const vendaBruta = Number(canal.meses?.[mesAtual]) || 0
+    if (vendaBruta <= 0) return
+
+    Object.entries(mapTipo).forEach(([tipo, label]) => {
+      const pct = parsePct(dv[tipo]?.[canal.id]) / 100
+      if (pct <= 0) return
+      const totalMensal = vendaBruta * pct
+      const diasU = diasUteisMes(anoAtual, mesAtual)
+      if (!diasU.length) return
+      const diario = totalMensal / diasU.length
+      diasU.forEach(dia => {
+        despesasVariaveisPag[dia.getDate()].push({ descricao: `${label} ${nome}`, valor: diario })
+      })
+    })
+  })
 
   // ─── Pré-computa pagamentos de fornecedores por dia ─────────────────────────
   const fornecPag = {}

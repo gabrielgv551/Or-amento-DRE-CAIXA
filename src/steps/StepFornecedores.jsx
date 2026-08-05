@@ -2,12 +2,23 @@ import React, { useRef } from 'react'
 
 const MESES_FULL = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
+const DESPESAS = [
+  { key: 'ads', icone: '📢', nome: 'Ads' },
+  { key: 'frete', icone: '🚚', nome: 'Frete' },
+  { key: 'comissao', icone: '💸', nome: 'Comissão' },
+]
+
 function parsePct(str) {
   const n = parseFloat(String(str || '').replace(',', '.'))
   return isNaN(n) ? 0 : n
 }
 
 function fmtBRL(v) {
+  if (!v && v !== 0) return ''
+  return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+function fmtPct(v) {
   if (!v && v !== 0) return ''
   return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
@@ -34,28 +45,80 @@ function PctCell({ value, onChange }) {
   )
 }
 
+function TabelaDespesa({ nome, icone, despesa, canais, onChange }) {
+  const totalAno = canais.reduce((s, c) => s + c.meses.reduce((a, b) => a + (Number(b) || 0), 0), 0)
+
+  return (
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white mb-4">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="bg-blue-600 text-white text-xs">
+            <th className="text-left px-3 py-2.5 font-semibold sticky left-0 bg-blue-600 z-10 min-w-[170px] border-r border-blue-500">{icone} {nome}</th>
+            <th className="text-center px-2 py-2.5 font-semibold min-w-[110px] border-r border-blue-500">% do canal</th>
+            {MESES_FULL.map((m, i) => (
+              <th key={m} className={`text-center px-2 py-2.5 font-semibold min-w-[100px] ${i < 11 ? 'border-r border-blue-500' : ''}`}>{m.substring(0, 3)}</th>
+            ))}
+            <th className="text-center px-2 py-2.5 font-semibold min-w-[110px] border-l border-blue-500">Total Ano</th>
+          </tr>
+        </thead>
+        <tbody>
+          {canais.map((canal, rowIdx) => {
+            const pct = parsePct(despesa?.[canal.id]) / 100
+            const totalCanal = canal.meses.reduce((s, v) => s + (Number(v) || 0), 0)
+            return (
+              <tr key={canal.id} className={`border-t border-slate-200 ${rowIdx % 2 === 0 ? 'bg-slate-50/50' : 'bg-slate-50/30'}`}>
+                <td className="sticky left-0 bg-inherit z-10 px-3 py-2 text-xs font-semibold text-slate-700 border-r border-slate-200">{canal.nome || 'Canal'}</td>
+                <td className="px-2 py-1.5 border-r border-slate-200">
+                  <PctCell value={despesa?.[canal.id]} onChange={v => onChange(canal.id, v)} />
+                </td>
+                {canal.meses.map((v, i) => (
+                  <td key={i} className={`px-2 py-2 text-right text-xs text-slate-700 ${i < 11 ? 'border-r border-slate-200/50' : ''}`}>
+                    {fmtBRL((Number(v) || 0) * pct)}
+                  </td>
+                ))}
+                <td className="px-2 py-2 text-right text-xs font-bold text-slate-900 border-l border-slate-200/50">{fmtBRL(totalCanal * pct)}</td>
+              </tr>
+            )
+          })}
+          <tr className="border-t-2 border-slate-200 bg-slate-100">
+            <td className="sticky left-0 bg-inherit z-10 px-3 py-2 text-xs font-bold text-slate-700 border-r border-slate-200" colSpan={2}>Total {nome}</td>
+            {Array(12).fill(0).map((_, i) => {
+              const totalMes = canais.reduce((s, c) => s + (Number(c.meses[i]) || 0) * (parsePct(despesa?.[c.id]) / 100), 0)
+              return (
+                <td key={i} className={`px-2 py-2 text-right text-xs font-bold text-slate-900 ${i < 11 ? 'border-r border-slate-200/50' : ''}`}>
+                  {fmtBRL(totalMes)}
+                </td>
+              )
+            })}
+            <td className="px-2 py-2 text-right text-xs font-bold text-slate-900 border-l border-slate-200/50">
+              {fmtBRL(canais.reduce((s, c) => s + (c.meses.reduce((a, b) => a + (Number(b) || 0), 0)) * (parsePct(despesa?.[c.id]) / 100), 0))}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 export default function StepFornecedores({ data, updateData, next, back, className }) {
   const canais = data.canais || []
+  const dv = data.despesasVariaveis || { ads: {}, frete: {}, comissao: {} }
+
+  const patch = (tipo, canalId, value) => {
+    updateData('despesasVariaveis', { ...dv, [tipo]: { ...dv[tipo], [canalId]: value } })
+  }
+
   const rol = Array(12).fill(0).map((_, m) =>
     canais.reduce((s, c) => s + (Number(c.meses?.[m]) || 0), 0)
   )
   const totalRol = rol.reduce((s, v) => s + v, 0)
-
-  const desp = data.despesasVariaveis || { ads: '', frete: '' }
-  const patch = (field, value) => updateData('despesasVariaveis', { ...desp, [field]: value })
-
-  const adsPct = parsePct(desp.ads) / 100
-  const fretePct = parsePct(desp.frete) / 100
-
-  const adsTotal = totalRol * adsPct
-  const freteTotal = totalRol * fretePct
 
   return (
     <div className={`w-full max-w-[98vw] px-2 ${className}`}>
       <div className="text-center mb-4">
         <div className="text-3xl mb-2">🏭</div>
         <h2 className="text-2xl font-bold text-slate-900 mb-1">Despesas Variáveis</h2>
-        <p className="text-slate-500 text-sm">Ads e frete como % da Receita Operacional Líquida (ROL)</p>
+        <p className="text-slate-500 text-sm">Ads, frete e comissão como % do faturamento de cada canal</p>
       </div>
 
       {/* ROL table */}
@@ -84,52 +147,19 @@ export default function StepFornecedores({ data, updateData, next, back, classNa
         </table>
       </div>
 
-      {/* Variable expenses */}
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white mb-4">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-blue-600 text-white text-xs">
-              <th className="text-left px-3 py-2.5 font-semibold sticky left-0 bg-blue-600 z-10 min-w-[170px] border-r border-blue-500">Despesa</th>
-              <th className="text-center px-2 py-2.5 font-semibold min-w-[110px] border-r border-blue-500">% da ROL</th>
-              {MESES_FULL.map((m, i) => (
-                <th key={m} className={`text-center px-2 py-2.5 font-semibold min-w-[100px] ${i < 11 ? 'border-r border-blue-500' : ''}`}>{m.substring(0, 3)}</th>
-              ))}
-              <th className="text-center px-2 py-2.5 font-semibold min-w-[110px] border-l border-blue-500">Total Ano</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Ads */}
-            <tr className="border-t border-slate-200 bg-slate-50/30">
-              <td className="sticky left-0 bg-inherit z-10 px-3 py-2 text-xs font-semibold text-slate-700 border-r border-slate-200">📢 Ads</td>
-              <td className="px-2 py-1.5 border-r border-slate-200">
-                <PctCell value={desp.ads} onChange={v => patch('ads', v)} />
-              </td>
-              {rol.map((v, i) => (
-                <td key={i} className={`px-2 py-2 text-right text-xs text-slate-700 ${i < 11 ? 'border-r border-slate-200/50' : ''}`}>
-                  {fmtBRL(v * adsPct)}
-                </td>
-              ))}
-              <td className="px-2 py-2 text-right text-xs font-bold text-slate-900 border-l border-slate-200/50">{fmtBRL(adsTotal)}</td>
-            </tr>
-            {/* Frete */}
-            <tr className="border-t border-slate-200 bg-slate-50/50">
-              <td className="sticky left-0 bg-inherit z-10 px-3 py-2 text-xs font-semibold text-slate-700 border-r border-slate-200">🚚 Frete</td>
-              <td className="px-2 py-1.5 border-r border-slate-200">
-                <PctCell value={desp.frete} onChange={v => patch('frete', v)} />
-              </td>
-              {rol.map((v, i) => (
-                <td key={i} className={`px-2 py-2 text-right text-xs text-slate-700 ${i < 11 ? 'border-r border-slate-200/50' : ''}`}>
-                  {fmtBRL(v * fretePct)}
-                </td>
-              ))}
-              <td className="px-2 py-2 text-right text-xs font-bold text-slate-900 border-l border-slate-200/50">{fmtBRL(freteTotal)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      {DESPESAS.map(d => (
+        <TabelaDespesa
+          key={d.key}
+          nome={d.nome}
+          icone={d.icone}
+          despesa={dv[d.key] || {}}
+          canais={canais}
+          onChange={(canalId, v) => patch(d.key, canalId, v)}
+        />
+      ))}
 
       <div className="mt-2 text-[11px] text-slate-400 text-center">
-        Preencha os percentuais de Ads e Frete sobre a ROL. O valor mensal é calculado automaticamente.
+        Preencha os percentuais de cada despesa por canal. O valor mensal é calculado automaticamente sobre o faturamento do canal.
       </div>
 
       <div className="flex gap-3 mt-4 max-w-lg mx-auto">
