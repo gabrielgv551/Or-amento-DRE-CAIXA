@@ -335,12 +335,9 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                 {visibleMeses.map((mesIdx, col) => (
                   <td
                     key={mesIdx}
-                    className={`px-1 py-1 ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
+                    className={`px-1 py-1 text-center text-xs text-red-600 ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
                   >
-                    <MoneyCell
-                      value={data.devolucao?.[mesIdx] || 0}
-                      onChange={v => changeDevolucao(mesIdx, v)}
-                    />
+                    -{fmtBRL(data.devolucao?.[mesIdx] || 0)}
                   </td>
                 ))}
               </tr>
@@ -404,9 +401,9 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                     {visibleMeses.map((mesIdx, col) => (
                       <td
                         key={mesIdx}
-                        className={`px-1 py-1 text-center text-xs text-slate-700 ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
+                        className={`px-1 py-1 text-center text-xs text-red-600 ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
                       >
-                        {fmtBRL(impostoMes(canal, mesIdx))}
+                        -{fmtBRL(impostoMes(canal, mesIdx))}
                       </td>
                     ))}
                   </tr>
