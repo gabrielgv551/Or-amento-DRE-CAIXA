@@ -218,6 +218,29 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
     }
   }
 
+  // ─── Pré-computa despesas variáveis (Ads e Frete) por dia ───────────────────
+  const despesasVariaveisPag = {}
+  for (let i = 1; i <= diasNoMes; i++) despesasVariaveisPag[i] = []
+
+  const dv = data.despesasVariaveis || {}
+  const adsPct = parsePct(dv.ads) / 100
+  const fretePct = parsePct(dv.frete) / 100
+  const rolMes = canais.reduce((s, c) => s + (Number(c.meses?.[mesAtual]) || 0), 0)
+
+  if (rolMes > 0) {
+    const diasU = diasUteisMes(anoAtual, mesAtual)
+    if (diasU.length > 0) {
+      if (adsPct > 0) {
+        const adsDiario = (rolMes * adsPct) / diasU.length
+        diasU.forEach(dia => despesasVariaveisPag[dia.getDate()].push({ descricao: 'Ads', valor: adsDiario }))
+      }
+      if (fretePct > 0) {
+        const freteDiario = (rolMes * fretePct) / diasU.length
+        diasU.forEach(dia => despesasVariaveisPag[dia.getDate()].push({ descricao: 'Frete', valor: freteDiario }))
+      }
+    }
+  }
+
   // ─── Pré-computa pagamentos de fornecedores por dia ─────────────────────────
   const fornecPag = {}
   for (let i = 1; i <= diasNoMes; i++) fornecPag[i] = []
@@ -246,7 +269,7 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
   for (let d = 1; d <= diasNoMes; d++) {
     const saldoInicialDia = saldoAcumulado
     const entradas = [...entregas[d]]
-    const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || []), ...(devolucaoPag[d] || [])]
+    const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || []), ...(devolucaoPag[d] || []), ...(despesasVariaveisPag[d] || [])]
 
     data.dividas?.forEach(div => {
       if (Number(div.diaVencimento) === d && Number(div.parcela) > 0) {
