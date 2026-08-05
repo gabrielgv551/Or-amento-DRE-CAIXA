@@ -292,9 +292,19 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
       })
     }
 
+    data.despesasFixas?.forEach(o => {
+      if (Number(o.diaVencimento) === d && Number(o.valor) > 0)
+        saidas.push({ descricao: o.nome || 'Despesa Fixa', valor: Number(o.valor) })
+    })
+
     data.outros?.forEach(o => {
       if (Number(o.diaVencimento) === d && Number(o.valor) > 0)
         saidas.push({ descricao: o.nome || 'Despesa', valor: Number(o.valor) })
+    })
+
+    data.despesasFixas?.forEach(o => {
+      if (Number(o.diaVencimento) === d && Number(o.valor) > 0)
+        saidas.push({ descricao: o.nome || 'Despesa Fixa', valor: Number(o.valor) })
     })
 
     const entradasNaoOp = []

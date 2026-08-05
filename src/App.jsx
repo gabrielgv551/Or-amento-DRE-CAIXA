@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import StepWelcome from './steps/StepWelcome'
 import StepFaturamento from './steps/StepFaturamento'
 import StepFornecedores from './steps/StepFornecedores'
+import StepDespesasFixas from './steps/StepDespesasFixas'
 import StepPessoal from './steps/StepPessoal'
 import StepOutros from './steps/StepOutros'
 import StepNaoOperacional from './steps/StepNaoOperacional'
@@ -16,6 +17,7 @@ const STEPS = [
   'Boas-vindas',
   'Faturamento',
   'Despesas Variáveis',
+  'Despesas Fixas',
   'Pessoal',
   'Outros',
   'Não Operacional',
@@ -33,6 +35,7 @@ const initialData = {
   outros: [],
   naoOperacional: { entradas: [], saidas: [] },
   despesasVariaveis: { ads: {}, frete: {}, comissao: {} },
+  despesasFixas: [],
 }
 
 export default function App() {
@@ -94,6 +97,7 @@ export default function App() {
     <StepWelcome key={animKey} className={stepClass} {...stepProps} />,
     <StepFaturamento key={animKey} className={stepClass} {...stepProps} />,
     <StepFornecedores key={animKey} className={stepClass} {...stepProps} />,
+    <StepDespesasFixas key={animKey} className={stepClass} {...stepProps} />,
     <StepPessoal key={animKey} className={stepClass} {...stepProps} />,
     <StepOutros key={animKey} className={stepClass} {...stepProps} />,
     <StepNaoOperacional key={animKey} className={stepClass} {...stepProps} />,
