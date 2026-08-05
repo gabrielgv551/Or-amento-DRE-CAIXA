@@ -135,7 +135,7 @@ export default function StepFornecedores({ data, updateData, next, back, classNa
     <div className={`w-full max-w-[98vw] px-2 ${className}`}>
       <div className="text-center mb-4">
         <div className="text-3xl mb-2">🏭</div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-1">Fornecedores</h2>
+        <h2 className="text-2xl font-bold text-slate-900 mb-1">Despesas Variáveis</h2>
         <p className="text-slate-500 text-sm">Compras com prazo, ato e parcelamento</p>
       </div>
 
@@ -157,7 +157,7 @@ export default function StepFornecedores({ data, updateData, next, back, classNa
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-blue-600 text-white text-xs">
-              <th className="text-left px-3 py-2.5 font-semibold sticky left-0 bg-blue-600 z-10 min-w-[170px] border-r border-blue-500">Fornecedor</th>
+              <th className="text-left px-3 py-2.5 font-semibold sticky left-0 bg-blue-600 z-10 min-w-[170px] border-r border-blue-500">Despesa</th>
               <th className="text-center px-2 py-2.5 font-semibold min-w-[120px] border-r border-blue-500 bg-blue-600">Previsto</th>
               <th className="text-center px-2 py-2.5 font-semibold min-w-[220px] border-r border-blue-500 bg-blue-600">Prazo</th>
               <th className="text-center px-2 py-2.5 font-semibold min-w-[68px] border-r border-blue-500 bg-blue-600">Ato %</th>
@@ -168,7 +168,7 @@ export default function StepFornecedores({ data, updateData, next, back, classNa
           </thead>
           <tbody>
             {lista.length === 0 && (
-              <tr><td colSpan={7} className="text-center py-10 text-slate-400 text-sm">Adicione fornecedores usando os botões acima</td></tr>
+              <tr><td colSpan={7} className="text-center py-10 text-slate-400 text-sm">Adicione despesas variáveis usando os botões acima</td></tr>
             )}
             {lista.map((f, rowIdx) => (
               <tr key={f.id} className={`border-t border-slate-200 ${rowIdx % 2 === 0 ? 'bg-slate-50/50' : 'bg-slate-50/30'} hover:bg-slate-100/20 transition`}>

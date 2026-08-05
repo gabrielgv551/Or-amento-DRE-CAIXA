@@ -24,7 +24,7 @@ export default function StepWelcome({ next, setMode, className }) {
       <div className="grid grid-cols-3 gap-3 mb-6 w-full">
         {[
           { icon: '📊', label: 'Faturamento' },
-          { icon: '🏭', label: 'Fornecedores' },
+          { icon: '🏭', label: 'Despesas Variáveis' },
           { icon: '💳', label: 'Dívidas' },
           { icon: '👥', label: 'Pessoal' },
           { icon: '📋', label: 'Outros' },

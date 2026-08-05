@@ -41,7 +41,7 @@ function getMesAnterior(ano, mes, offset) {
   return { ano: a, mes: m }
 }
 
-// ─── Fornecedores: cálculo de parcelas (mesma lógica do Apps Script) ──────────
+// ─── Despesas Variáveis: cálculo de parcelas (mesma lógica do Apps Script) ──────────
 function calcParcelasVencimentosFluxo(baseDt, prazoStr) {
   const result = []
   const prazo  = String(prazoStr || '').trim().toUpperCase()

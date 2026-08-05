@@ -15,7 +15,7 @@ import { loadStorage, saveStorage } from './utils/storage'
 const STEPS = [
   'Boas-vindas',
   'Faturamento',
-  'Fornecedores',
+  'Despesas Variáveis',
   'Pessoal',
   'Outros',
   'Não Operacional',
