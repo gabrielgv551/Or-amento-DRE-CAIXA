@@ -27,7 +27,7 @@ function parseBRL(str) {
 
 function fmtBRL(v) {
   if (!v) return ''
-  return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 }
 
 function MoneyCell({ value, onChange }) {
@@ -91,10 +91,10 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
   const totalCanal = (canal) => canal.meses.reduce((s, v) => s + (Number(v) || 0), 0)
 
   const changeTotalAno = (id, total) => {
-    const mensal = total / 12
+    const mensal = Math.round(total / 12)
     updateData('canais', canais.map(c => {
       if (c.id !== id) return c
-      return { ...c, meses: Array(12).fill(Number(mensal.toFixed(2))) }
+      return { ...c, meses: Array(12).fill(mensal) }
     }))
   }
 
