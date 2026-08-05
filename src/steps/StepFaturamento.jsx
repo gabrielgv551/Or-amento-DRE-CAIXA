@@ -91,10 +91,12 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
   const totalCanal = (canal) => canal.meses.reduce((s, v) => s + (Number(v) || 0), 0)
 
   const changeTotalAno = (id, total) => {
-    const mensal = Math.round(total / 12)
+    const base = Math.floor(total / 12)
+    const resto = total - base * 12
+    const meses = Array(12).fill(base).map((v, i) => (i < resto ? v + 1 : v))
     updateData('canais', canais.map(c => {
       if (c.id !== id) return c
-      return { ...c, meses: Array(12).fill(mensal) }
+      return { ...c, meses }
     }))
   }
 
