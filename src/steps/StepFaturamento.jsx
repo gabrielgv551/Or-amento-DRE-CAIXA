@@ -88,6 +88,16 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
       return { ...c, meses }
     }))
 
+  const totalCanal = (canal) => canal.meses.reduce((s, v) => s + (Number(v) || 0), 0)
+
+  const changeTotalAno = (id, total) => {
+    const mensal = total / 12
+    updateData('canais', canais.map(c => {
+      if (c.id !== id) return c
+      return { ...c, meses: Array(12).fill(Number(mensal.toFixed(2))) }
+    }))
+  }
+
   const jaAdicionado = (nome) => canais.some(c => c.nome === nome)
 
   return (
@@ -138,7 +148,7 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                 Dias p/<br />receber
               </th>
               <th className="text-center px-2 py-2.5 font-semibold min-w-[100px] border-r border-blue-500 text-white bg-blue-600">
-                Base de<br />Cálculo
+                Total do<br />Ano
               </th>
               {visibleMeses.map((i, col) => (
                 <th
@@ -204,9 +214,12 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                   />
                 </td>
 
-                {/* Base de cálculo */}
-                <td className="px-2 py-1.5 border-r border-slate-200 text-center">
-                  <span className="text-slate-500 text-xs whitespace-nowrap">Vendas Brutas</span>
+                {/* Total do ano */}
+                <td className="px-2 py-1.5 border-r border-slate-200">
+                  <MoneyCell
+                    value={totalCanal(canal)}
+                    onChange={v => changeTotalAno(canal.id, v)}
+                  />
                 </td>
 
                 {/* Monthly values — only visible months */}
