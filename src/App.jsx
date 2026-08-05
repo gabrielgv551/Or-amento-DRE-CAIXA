@@ -112,7 +112,7 @@ export default function App() {
               ? 'bg-blue-600 text-white'
               : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}
           >
-            Fluxo de Caixa
+            Simulador de Orçamento, DRE / Caixa
           </button>
           <button
             onClick={() => switchMode('margem')}

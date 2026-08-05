@@ -42,7 +42,7 @@ export default function StepWelcome({ next, setMode, className }) {
           onClick={next}
           className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98]"
         >
-          Fluxo de Caixa →
+          DRE / Caixa →
         </button>
         <button
           onClick={() => setMode('margem')}
