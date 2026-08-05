@@ -10,6 +10,7 @@ const SUGESTOES = [
   { nome: 'Software / SaaS' },
   { nome: 'Seguro' },
   { nome: 'Marketing fixo' },
+  { nome: 'Folha' },
 ]
 
 const emptyDespesa = (nome = '') => ({
