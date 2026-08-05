@@ -68,8 +68,8 @@ function MoneyCell({ value, onChange }) {
 export default function StepFaturamento({ data, updateData, next, back, className }) {
   const canais      = data.canais || []
   const mesAtual    = new Date().getMonth()
-  // Show all 12 months
-  const visibleMeses = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(offset => (mesAtual + offset) % 12)
+  // Show all 12 months in calendar order (Jan-Dec)
+  const visibleMeses = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
   const addCanal = (nome = '', deducao = '0', leadTime = '14') =>
     updateData('canais', [...canais, emptyCanal(nome, deducao, leadTime)])
