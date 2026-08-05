@@ -264,6 +264,22 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
     }
   })
 
+  // ─── Pré-computa despesas fixas mensais por dia ─────────────────────────────
+  const despesasFixasPag = {}
+  for (let i = 1; i <= diasNoMes; i++) despesasFixasPag[i] = []
+
+  const df = data.despesasFixas || []
+  const diasUteisAtual = diasUteisMes(anoAtual, mesAtual)
+  df.forEach(despesa => {
+    const nome = despesa.nome || 'Despesa Fixa'
+    const valorMes = Number(despesa.meses?.[mesAtual]) || 0
+    if (valorMes <= 0 || diasUteisAtual.length === 0) return
+    const diario = valorMes / diasUteisAtual.length
+    diasUteisAtual.forEach(dia => {
+      despesasFixasPag[dia.getDate()].push({ descricao: nome, valor: diario })
+    })
+  })
+
   // ─── Monta array diário ───────────────────────────────────────────────────
   const dias = []
   let saldoAcumulado = Number(data.saldoInicial) || 0
@@ -271,7 +287,7 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
   for (let d = 1; d <= diasNoMes; d++) {
     const saldoInicialDia = saldoAcumulado
     const entradas = [...entregas[d]]
-    const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || []), ...(devolucaoPag[d] || []), ...(despesasVariaveisPag[d] || [])]
+    const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || []), ...(devolucaoPag[d] || []), ...(despesasVariaveisPag[d] || []), ...(despesasFixasPag[d] || [])]
 
     data.dividas?.forEach(div => {
       if (Number(div.diaVencimento) === d && Number(div.parcela) > 0) {
@@ -291,11 +307,6 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
           saidas.push({ descricao: p.nome || 'Colaborador', valor: Number(p.salario) })
       })
     }
-
-    data.despesasFixas?.forEach(o => {
-      if (Number(o.diaVencimento) === d && Number(o.valor) > 0)
-        saidas.push({ descricao: o.nome || 'Despesa Fixa', valor: Number(o.valor) })
-    })
 
     data.outros?.forEach(o => {
       if (Number(o.diaVencimento) === d && Number(o.valor) > 0)
