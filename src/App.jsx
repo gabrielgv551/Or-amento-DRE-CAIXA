@@ -7,6 +7,7 @@ import StepDespesasFixas from './steps/StepDespesasFixas'
 import StepDespesasFinanceiras from './steps/StepDespesasFinanceiras'
 import StepRegimeFiscal from './steps/StepRegimeFiscal'
 import StepDreFluxo from './steps/StepDreFluxo'
+import StepPremissasCaixa from './steps/StepPremissasCaixa'
 import StepMargem from './steps/StepMargem'
 import StepDre from './steps/StepDre'
 import StepPmv from './steps/StepPmv'
@@ -22,6 +23,7 @@ const STEPS = [
   'Despesas Financeiras',
   'Regime Fiscal',
   'DRE',
+  'Premissas Caixa',
 ]
 
 const initialData = {
@@ -38,6 +40,13 @@ const initialData = {
   despesasFixas: [],
   custos: {},
   regimeFiscal: 'lucroPresumido',
+  premissasCaixa: {
+    pmr: 30,
+    pmp: 30,
+    coberturaEstoque: 30,
+    recolhimentoImpostos: 'mesmoMes',
+    pagamentoFolha: 'mesSeguinte',
+  },
 }
 
 function normalizeData(raw) {
@@ -54,6 +63,14 @@ function normalizeData(raw) {
     ...d,
     meses: Array.isArray(d.meses) ? d.meses : Array(12).fill(0),
   }))
+  data.premissasCaixa = {
+    pmr: 30,
+    pmp: 30,
+    coberturaEstoque: 30,
+    recolhimentoImpostos: 'mesmoMes',
+    pagamentoFolha: 'mesSeguinte',
+    ...(data.premissasCaixa || {}),
+  }
   return data
 }
 
@@ -124,6 +141,7 @@ export default function App() {
     <StepDespesasFinanceiras key={animKey} className={stepClass} {...stepProps} />,
     <StepRegimeFiscal key={animKey} className={stepClass} {...stepProps} />,
     <StepDreFluxo key={animKey} className={stepClass} {...stepProps} />,
+    <StepPremissasCaixa key={animKey} className={stepClass} {...stepProps} />,
   ]
 
   return (
