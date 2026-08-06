@@ -12,14 +12,19 @@ function parsePct(str) {
   return isNaN(n) ? 0 : n
 }
 
-function ValorCell({ value, bold, neg, highlight }) {
+function fmtPercent(v) {
+  return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%'
+}
+
+function ValorCell({ value, bold, neg, highlight, italic, suffix }) {
   const v = Number(value) || 0
-  const cls = bold ? 'font-bold' : ''
+  const cls = `${bold ? 'font-bold' : ''} ${italic ? 'italic' : ''}`
   let color
   if (highlight) color = 'text-white'
   else if (neg) color = v < 0 ? 'text-red-600' : 'text-emerald-600'
   else color = 'text-slate-700'
-  return <td className={`px-2 py-2 text-right text-xs ${cls} ${color}`}>{fmtBRL(v)}</td>
+  const display = suffix ? fmtPercent(value) : fmtBRL(v)
+  return <td className={`px-2 py-2 text-right text-xs ${cls} ${color}`}>{display}</td>
 }
 
 export default function StepDreFluxo({ data, back, restart, className }) {
@@ -98,7 +103,8 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     { label: 'ROB', values: receitaBrutaTotal, highlight: true },
     { label: 'Devoluções', values: devolucoes, sub: true },
     { label: 'Impostos', values: impostos, sub: true },
-    { label: 'ROL', values: rol, bold: true },
+    { label: 'ROL', values: rol, highlight: true },
+    { label: 'ROL% sobre ROB', values: rol.map((v, i) => receitaBrutaTotal[i] ? (v / receitaBrutaTotal[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
     { label: 'Despesas Variáveis', values: Array(12).fill(0), header: true },
     { label: 'Ads', values: ads, sub: true },
     { label: 'Frete', values: frete, sub: true },
@@ -131,7 +137,11 @@ export default function StepDreFluxo({ data, back, restart, className }) {
           </thead>
           <tbody>
             {rows.map((row, idx) => {
-              const total = row.values.reduce((s, v) => s + (Number(v) || 0), 0)
+              const totalRob = receitaBrutaTotal.reduce((s, v) => s + (Number(v) || 0), 0)
+              const totalRol = rol.reduce((s, v) => s + (Number(v) || 0), 0)
+              const total = row.suffix === '%'
+                ? (totalRob ? (totalRol / totalRob) * 100 : 0)
+                : row.values.reduce((s, v) => s + (Number(v) || 0), 0)
               if (row.header) {
                 return (
                   <tr key={row.label} className="bg-slate-100">
@@ -141,14 +151,14 @@ export default function StepDreFluxo({ data, back, restart, className }) {
               }
               return (
                 <tr key={row.label} className={`border-t border-slate-200 ${row.highlight ? 'bg-blue-900 text-white' : idx % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'} ${row.bold && !row.highlight ? 'bg-blue-50/50' : ''}`}>
-                  <td className={`sticky left-0 bg-inherit z-10 px-3 py-2 text-xs border-r border-slate-200 ${row.highlight ? 'font-bold text-white' : row.bold ? 'font-bold text-slate-900' : row.sub ? 'text-slate-500 pl-6' : 'font-semibold text-slate-700'}`}>
+                  <td className={`sticky left-0 bg-inherit z-10 px-3 py-2 text-xs border-r border-slate-200 ${row.highlight ? 'font-bold text-white' : row.bold ? 'font-bold text-slate-900' : row.sub ? 'text-slate-500 pl-6' : 'font-semibold text-slate-700'} ${row.italic ? 'italic' : ''}`}>
                     {row.label}
                   </td>
                   {row.values.map((v, i) => (
-                    <ValorCell key={i} value={v} bold={row.bold} neg={row.neg} highlight={row.highlight} />
+                    <ValorCell key={i} value={v} bold={row.bold} neg={row.neg} highlight={row.highlight} italic={row.italic} suffix={row.suffix} />
                   ))}
-                  <td className={`px-2 py-2 text-right text-xs border-l border-slate-200/50 ${row.highlight ? 'font-bold text-white' : row.bold ? 'font-bold text-slate-900' : 'text-slate-700'}`}>
-                    {fmtBRL(total)}
+                  <td className={`px-2 py-2 text-right text-xs border-l border-slate-200/50 ${row.highlight ? 'font-bold text-white' : row.bold ? 'font-bold text-slate-900' : 'text-slate-700'} ${row.italic ? 'italic' : ''}`}>
+                    {row.suffix === '%' ? fmtPercent(total) : fmtBRL(total)}
                   </td>
                 </tr>
               )
