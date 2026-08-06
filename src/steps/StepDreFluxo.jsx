@@ -65,11 +65,11 @@ export default function StepDreFluxo({ data, back, restart, className }) {
   )
 
   const despesasFixas = Array(12).fill(0).map((_, m) =>
-    fixas.reduce((s, f) => s + (Number(f.valor) || 0), 0)
+    fixas.reduce((s, f) => s + (Number((f.meses || [])[m]) || 0), 0)
   )
 
   const despesasFinanceiras = Array(12).fill(0).map((_, m) =>
-    financeiras.reduce((s, f) => s + (Number(f.valor) || 0), 0)
+    financeiras.reduce((s, f) => s + (Number((f.meses || [])[m]) || 0), 0)
   )
 
   const despesasPessoal = Array(12).fill(pessoal)
