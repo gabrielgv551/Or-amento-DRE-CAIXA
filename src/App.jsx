@@ -8,6 +8,7 @@ import StepDespesasFinanceiras from './steps/StepDespesasFinanceiras'
 import StepRegimeFiscal from './steps/StepRegimeFiscal'
 import StepDreFluxo from './steps/StepDreFluxo'
 import StepPremissasCaixa from './steps/StepPremissasCaixa'
+import StepFluxoMensal from './steps/StepFluxoMensal'
 import StepMargem from './steps/StepMargem'
 import StepDre from './steps/StepDre'
 import StepPmv from './steps/StepPmv'
@@ -24,6 +25,7 @@ const STEPS = [
   'Regime Fiscal',
   'DRE',
   'Premissas Caixa',
+  'Fluxo de Caixa',
 ]
 
 const initialData = {
@@ -142,6 +144,7 @@ export default function App() {
     <StepRegimeFiscal key={animKey} className={stepClass} {...stepProps} />,
     <StepDreFluxo key={animKey} className={stepClass} {...stepProps} />,
     <StepPremissasCaixa key={animKey} className={stepClass} {...stepProps} />,
+    <StepFluxoMensal key={animKey} className={stepClass} {...stepProps} />,
   ]
 
   return (
