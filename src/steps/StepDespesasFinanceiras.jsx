@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 
 const MESES_FULL = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
@@ -215,6 +215,34 @@ function TabelaMensal({ titulo, cor, itens, onUpdate, sugestoes, placeholderNova
 export default function StepDespesasFinanceiras({ data, updateData, next, back, className }) {
   const despesas = data.outros || []
   const receitas = data.receitasFinanceiras || []
+  const emprestimos = data.emprestimos || []
+
+  const [showModal, setShowModal] = useState(false)
+  const [form, setForm] = useState({ nome: '', principal: '', prazo: 12, taxa: '', mesInicio: 0 })
+
+  const openModal = () => {
+    setForm({ nome: '', principal: '', prazo: 12, taxa: '', mesInicio: 0 })
+    setShowModal(true)
+  }
+
+  const closeModal = () => setShowModal(false)
+
+  const updateForm = (field, value) => setForm(prev => ({ ...prev, [field]: value }))
+
+  const handleSave = () => {
+    const principal = parseBRL(form.principal)
+    const taxa = Number(String(form.taxa).replace(',', '.')) || 0
+    const prazo = Math.max(1, Number(form.prazo) || 1)
+    const mesInicio = Math.max(0, Math.min(11, Number(form.mesInicio) || 0))
+    if (principal <= 0) return
+    updateData('emprestimos', [
+      ...emprestimos,
+      { id: Date.now() + Math.random(), nome: form.nome || 'Empréstimo', principal, taxa, prazo, mesInicio },
+    ])
+    closeModal()
+  }
+
+  const removeEmprestimo = (id) => updateData('emprestimos', emprestimos.filter(e => e.id !== id))
 
   return (
     <div className={`w-full max-w-[98vw] px-2 ${className}`}>
@@ -242,6 +270,40 @@ export default function StepDespesasFinanceiras({ data, updateData, next, back, 
         placeholderNova="Nova receita financeira"
       />
 
+      <div className="max-w-4xl mx-auto mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-bold text-slate-700">Empréstimos</h3>
+          <button
+            onClick={openModal}
+            className="text-xs px-3 py-1.5 rounded-full border border-dashed border-blue-400 text-blue-600 hover:bg-blue-50 hover:border-blue-500 transition font-medium"
+          >
+            + Simular empréstimo
+          </button>
+        </div>
+        {emprestimos.length === 0 ? (
+          <p className="text-sm text-slate-400">Nenhum empréstimo simulado.</p>
+        ) : (
+          <div className="space-y-2">
+            {emprestimos.map((e) => (
+              <div key={e.id} className="flex items-center justify-between bg-white rounded-xl border border-slate-200 px-4 py-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{e.nome}</p>
+                  <p className="text-xs text-slate-500">
+                    {fmtBRL(e.principal)} · {e.prazo}x · {Number(e.taxa).toLocaleString('pt-BR')} % a.m. · início {MESES_FULL[e.mesInicio]}
+                  </p>
+                </div>
+                <button
+                  onClick={() => removeEmprestimo(e.id)}
+                  className="text-slate-400 hover:text-red-400 transition text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="flex gap-3 mt-5 max-w-lg mx-auto">
         <button onClick={back} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 transition font-medium text-sm">
           ← Voltar
@@ -250,6 +312,86 @@ export default function StepDespesasFinanceiras({ data, updateData, next, back, 
           Próximo →
         </button>
       </div>
+
+      {showModal && (
+        <>
+          <div className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm" onClick={closeModal} />
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-2xl p-5 mx-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Simular empréstimo</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Nome</label>
+                <input
+                  type="text"
+                  value={form.nome}
+                  onChange={e => updateForm('nome', e.target.value)}
+                  placeholder="Ex: Empréstimo bancário"
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Valor do empréstimo</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-xs text-slate-400">R$</span>
+                    <input
+                      type="text"
+                      value={form.principal}
+                      onChange={e => updateForm('principal', e.target.value)}
+                      placeholder="0,00"
+                      className="w-full border border-slate-200 rounded-lg pl-8 pr-3 py-2 text-sm text-right focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Parcelas</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="12"
+                    value={form.prazo}
+                    onChange={e => updateForm('prazo', e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Taxa de juros mensal</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={form.taxa}
+                      onChange={e => updateForm('taxa', e.target.value)}
+                      placeholder="0,00"
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-right focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    />
+                    <span className="absolute right-3 top-2 text-xs text-slate-400">%</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Mês de início</label>
+                  <select
+                    value={form.mesInicio}
+                    onChange={e => updateForm('mesInicio', Number(e.target.value))}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+                  >
+                    {MESES_FULL.map((m, i) => <option key={m} value={i}>{m}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={closeModal} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 transition font-medium text-sm">
+                Cancelar
+              </button>
+              <button onClick={handleSave} className="flex-[2] bg-blue-500 hover:bg-blue-400 text-slate-900 font-bold py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20 text-sm">
+                Salvar empréstimo
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -1,3 +1,5 @@
+import { calcularEmprestimos } from './emprestimos'
+
 function parsePct(str) {
   const n = parseFloat(String(str || '').replace(',', '.'))
   return isNaN(n) ? 0 : n
@@ -98,6 +100,8 @@ export function gerarFluxoMensal(data) {
     financeiras.reduce((s, f) => s + (Number((f.meses || [])[m]) || 0), 0)
   )
 
+  const { entradas: emprestimosEntradas, amortizacoes: emprestimosAmortizacoes, juros: emprestimosJuros } = calcularEmprestimos(data.emprestimos)
+
   const folhaBase = Array(12).fill(pessoal)
   const folhaPagamento = premissas.pagamentoFolha === 'mesSeguinte'
     ? shiftArray(folhaBase, 1)
@@ -138,7 +142,7 @@ export function gerarFluxoMensal(data) {
       const valor = Number(e.valor) || 0
       if (valor > 0) total += valor
     })
-    return total + receitasFinanceirasMes[m]
+    return total + receitasFinanceirasMes[m] + emprestimosEntradas[m]
   })
 
   const saidasNaoOp = Array(12).fill(0).map((_, m) => {
@@ -147,7 +151,7 @@ export function gerarFluxoMensal(data) {
       const valor = Number(s.valor) || 0
       if (valor > 0) total += valor
     })
-    return total + despesasFinanceirasMes[m]
+    return total + despesasFinanceirasMes[m] + emprestimosAmortizacoes[m] + emprestimosJuros[m]
   })
 
   const entradasOperacionais = recebimentosVendas
@@ -169,6 +173,9 @@ export function gerarFluxoMensal(data) {
   return {
     recebimentosVendas,
     receitasFinanceirasMes,
+    emprestimosEntradas,
+    emprestimosAmortizacoes,
+    emprestimosJuros,
     entradasOperacionais,
     impostosPagamento,
     pagamentoFornecedores,

@@ -1,5 +1,6 @@
 import React from 'react'
 import * as XLSX from 'xlsx'
+import { calcularEmprestimos } from '../utils/emprestimos'
 
 const MESES_FULL = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
@@ -100,6 +101,9 @@ export default function StepDreFluxo({ data, next, back, restart, className }) {
     financeiras.reduce((s, f) => s + (Number((f.meses || [])[m]) || 0), 0)
   )
 
+  const { juros: jurosEmprestimos } = calcularEmprestimos(data.emprestimos)
+  const despesasFinanceirasComJuros = despesasFinanceiras.map((v, i) => v + jurosEmprestimos[i])
+
   const despesasPessoal = Array(12).fill(pessoal)
 
   const totalDespesas = Array(12).fill(0).map((_, m) =>
@@ -120,7 +124,7 @@ export default function StepDreFluxo({ data, next, back, restart, className }) {
   }))
 
   const ebitda = margemContribuicao.map((v, i) => v - despesasFixas[i])
-  const lucroOperacional = ebitda.map((v, i) => v - despesasFinanceiras[i])
+  const lucroOperacional = ebitda.map((v, i) => v - despesasFinanceirasComJuros[i])
 
   const regimeFiscal = data.regimeFiscal || 'lucroPresumido'
 
@@ -156,7 +160,7 @@ export default function StepDreFluxo({ data, next, back, restart, className }) {
     ...fixasRows,
     { label: 'EBITDA', values: ebitda, highlight: true, bold: true },
     { label: 'EBITDA % / ROL', values: ebitda.map((v, i) => rol[i] ? (v / rol[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
-    { label: 'Despesas Financeiras', values: despesasFinanceiras, sub: true, expense: true },
+    { label: 'Despesas Financeiras', values: despesasFinanceirasComJuros, sub: true, expense: true },
     { label: 'Lucro Operacional', values: lucroOperacional, highlight: true, bold: true },
     { label: 'Lucro Operacional % / ROL', values: lucroOperacional.map((v, i) => rol[i] ? (v / rol[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
     { label: 'IRPJ', values: irpj, sub: true, expense: true },

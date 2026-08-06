@@ -37,6 +37,7 @@ const initialData = {
   dividas: [],
   outros: [],
   receitasFinanceiras: [],
+  emprestimos: [],
   naoOperacional: { entradas: [], saidas: [] },
   despesasVariaveis: { ads: {}, frete: {}, comissao: {} },
   despesasFixas: [],
@@ -67,6 +68,7 @@ function normalizeData(raw) {
     ...d,
     meses: Array.isArray(d.meses) ? d.meses : Array(12).fill(0),
   }))
+  data.emprestimos = (data.emprestimos || []).map(d => ({ ...d }))
   data.premissasCaixa = {
     pmr: 30,
     pmp: 30,
