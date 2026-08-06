@@ -36,7 +36,7 @@ function fmtBRL(v) {
 }
 
 function parsePct(value) {
-  const normalized = String(value).replace(',', '.').replace(/[^\d.]/g, '')
+  const normalized = String(value).replace(',', '.').replace(/[^\d.-]/g, '')
   const n = parseFloat(normalized)
   return isNaN(n) ? 0 : n
 }
