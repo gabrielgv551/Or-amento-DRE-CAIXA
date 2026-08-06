@@ -46,21 +46,6 @@ export default function StepPremissasCaixa({ data, updateData, next, back, class
     updateData('premissasCaixa', { ...premissas, [field]: value })
   }
 
-  const dividas = premissas.dividas || []
-
-  const addDivida = () => {
-    update('dividas', [...dividas, { nome: 'Dívida', parcela: 0, juros: 0 }])
-  }
-
-  const updateDivida = (idx, field, value) => {
-    const next = dividas.map((d, i) => (i === idx ? { ...d, [field]: value } : d))
-    update('dividas', next)
-  }
-
-  const removeDivida = (idx) => {
-    update('dividas', dividas.filter((_, i) => i !== idx))
-  }
-
   const inputClass =
     'w-full bg-transparent border-b border-slate-300 text-center text-slate-900 py-2 outline-none transition focus:border-cyan-500 focus:bg-blue-50/50'
 
@@ -203,86 +188,6 @@ export default function StepPremissasCaixa({ data, updateData, next, back, class
             <option value="mesSeguinte">No mês seguinte</option>
           </select>
           <p className="mt-2 text-xs text-slate-400">Mês de pagamento da folha e encargos</p>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">Dívidas / Parcelas Não Operacionais</h3>
-            <p className="text-xs text-slate-500">Pagamentos mensais de empréstimo, cartão ou financiamento</p>
-          </div>
-          <button
-            onClick={addDivida}
-            className="text-xs px-3 py-1.5 rounded-full border border-dashed border-blue-400 text-blue-600 hover:bg-blue-50 hover:border-blue-500 transition font-medium"
-          >
-            + Adicionar dívida
-          </button>
-        </div>
-
-        {dividas.length === 0 && (
-          <p className="text-sm text-slate-400">Nenhuma dívida cadastrada.</p>
-        )}
-
-        <div className="space-y-4">
-          {dividas.map((divida, idx) => (
-            <div key={idx} className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-md">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="text-2xl">💳</div>
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900">Dívida {idx + 1}</h3>
-                    <p className="text-xs text-slate-500">Pagamento mensal</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => removeDivida(idx)}
-                  className="text-slate-400 hover:text-red-400 transition text-sm"
-                  title="Remover dívida"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Nome</label>
-                  <input
-                    type="text"
-                    value={divida.nome ?? 'Dívida'}
-                    onChange={e => updateDivida(idx, 'nome', e.target.value)}
-                    className="w-full bg-transparent border-b border-slate-300 text-center text-slate-900 py-2 outline-none transition focus:border-cyan-500 focus:bg-blue-50/50 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Parcela/mês</label>
-                  <CurrencyInput
-                    value={divida.parcela ?? 0}
-                    onChange={v => updateDivida(idx, 'parcela', v)}
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Juros %</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={divida.juros ?? 0}
-                      onChange={e => updateDivida(idx, 'juros', Number(e.target.value))}
-                      className={inputClass}
-                    />
-                    <span className="absolute right-0 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
-                  </div>
-                </div>
-              </div>
-              {divida.parcela > 0 && divida.juros > 0 && (
-                <div className="mt-4 text-xs text-amber-700/80 bg-amber-50 rounded-lg px-3 py-2">
-                  🔥 Juros mensais: R$ {((divida.parcela * divida.juros) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-              )}
-            </div>
-          ))}
         </div>
       </div>
 

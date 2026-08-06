@@ -38,7 +38,6 @@ export default function StepFluxoMensal({ data, back, restart, className }) {
     { label: 'Total Operacional', values: fluxo.totalOperacional, highlight: true, bold: true },
     { label: 'ATIVIDADES NÃO OPERACIONAIS', header: true },
     { label: 'Receitas Financeiras', values: fluxo.receitasFinanceirasMes, sub: true },
-    { label: 'Dívidas / Parcelas Não Operacionais', values: fluxo.dividaPag, sub: true, expense: true },
     { label: 'Recebimento de Empréstimos', values: fluxo.emprestimosEntradas, sub: true },
     { label: 'Amortização de Empréstimos', values: fluxo.emprestimosAmortizacoes, sub: true, expense: true },
     { label: 'Juros de Empréstimos', values: fluxo.emprestimosJuros, sub: true, expense: true },
