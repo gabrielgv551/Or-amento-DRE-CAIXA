@@ -47,14 +47,13 @@ export default function StepFluxoMensal({ data, back, restart, className }) {
   ]
 
   const handleExportExcel = () => {
-    const aoa = [['Descrição', ...MESES_FULL.map((m) => m.substring(0, 3)), 'Total Ano']]
+    const aoa = [['Descrição', ...MESES_FULL.map((m) => m.substring(0, 3))]]
     rows.forEach((row) => {
       if (row.header) {
         aoa.push([row.label])
         return
       }
-      const total = (row.values || []).reduce((s, v) => s + (Number(v) || 0), 0)
-      aoa.push([row.label, ...(row.values || []).map(brl), brl(total)])
+      aoa.push([row.label, ...(row.values || []).map(brl)])
     })
     const ws = XLSX.utils.aoa_to_sheet(aoa)
     const wb = XLSX.utils.book_new()
@@ -101,7 +100,6 @@ export default function StepFluxoMensal({ data, back, restart, className }) {
               {MESES_FULL.map((m, i) => (
                 <th key={m} className={`text-center px-2 py-2.5 font-semibold min-w-[110px] ${i < 11 ? 'border-r border-blue-500' : ''}`}>{m.substring(0, 3)}</th>
               ))}
-              <th className="text-center px-2 py-2.5 font-semibold min-w-[130px] border-l border-blue-500">Total Ano</th>
             </tr>
           </thead>
           <tbody>
@@ -109,11 +107,10 @@ export default function StepFluxoMensal({ data, back, restart, className }) {
               if (row.header) {
                 return (
                   <tr key={row.label} className="bg-blue-100">
-                    <td className="px-3 py-2 text-xs font-bold text-blue-900 border-r border-blue-200" colSpan={14}>{row.label}</td>
+                    <td className="px-3 py-2 text-xs font-bold text-blue-900 border-r border-blue-200" colSpan={13}>{row.label}</td>
                   </tr>
                 )
               }
-              const total = (row.values || []).reduce((s, v) => s + (Number(v) || 0), 0)
               const displayValue = (v) => (row.expense ? -v : v)
               const rowBg = row.highlight ? 'bg-blue-900 text-white' : row.group ? 'bg-blue-100' : idx % 2 === 0 ? 'bg-slate-50' : 'bg-white'
               return (
@@ -124,9 +121,6 @@ export default function StepFluxoMensal({ data, back, restart, className }) {
                   {(row.values || []).map((v, i) => (
                     <NumCell key={i} value={displayValue(v)} bold={row.bold || row.highlight} negColor />
                   ))}
-                  <td className={`px-2 py-2 text-right text-xs border-l border-slate-200/50 ${row.highlight ? 'font-bold text-white' : row.bold ? 'font-bold text-slate-900' : 'text-slate-700'}`}>
-                    {brl(displayValue(total))}
-                  </td>
                 </tr>
               )
             })}
