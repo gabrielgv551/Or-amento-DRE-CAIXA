@@ -46,6 +46,10 @@ export function gerarFluxoMensal(data) {
     receitasFinanceiras.reduce((s, f) => s + (Number((f.meses || [])[m]) || 0), 0)
   )
 
+  const despesasFinanceirasMes = Array(12).fill(0).map((_, m) =>
+    (data.outros || []).reduce((s, f) => s + (Number((f.meses || [])[m]) || 0), 0)
+  )
+
   const receitaBrutaTotal = receitaBruta.map((v, i) => v + receitasFinanceirasMes[i])
 
   const impostos = Array(12).fill(0).map((_, m) =>
@@ -142,7 +146,7 @@ export function gerarFluxoMensal(data) {
       const valor = Number(s.valor) || 0
       if (valor > 0) total += valor
     })
-    return total + emprestimosAmortizacoes[m] + emprestimosJuros[m]
+    return total + emprestimosAmortizacoes[m] + emprestimosJuros[m] + despesasFinanceirasMes[m]
   })
 
   const entradasOperacionais = recebimentosVendas
@@ -164,6 +168,7 @@ export function gerarFluxoMensal(data) {
   return {
     recebimentosVendas,
     receitasFinanceirasMes,
+    despesasFinanceirasMes,
     emprestimosEntradas,
     emprestimosAmortizacoes,
     emprestimosJuros,

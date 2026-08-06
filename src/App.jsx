@@ -21,6 +21,7 @@ const STEPS = [
   'Custos',
   'Despesas Variáveis',
   'Despesas Fixas',
+  'Despesas Financeiras',
   'Regime Fiscal',
   'DRE',
   'Premissas Caixa',
