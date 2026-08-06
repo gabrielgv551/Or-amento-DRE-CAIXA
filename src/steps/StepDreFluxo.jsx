@@ -160,7 +160,8 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     { label: 'Lucro Operacional % / ROL', values: lucroOperacional.map((v, i) => rol[i] ? (v / rol[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
     { label: 'IRPJ', values: irpj, sub: true, expense: true },
     { label: 'CSLL', values: csll, sub: true, expense: true },
-    { label: 'Lucro Líquido', values: lucroLiquido, bold: true, neg: true },
+    { label: 'Lucro Líquido', values: lucroLiquido, highlight: true, bold: true },
+    { label: 'Lucro Líquido % / ROL', values: lucroLiquido.map((v, i) => rol[i] ? (v / rol[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
   ]
 
   const totalRob = receitaBrutaTotal.reduce((s, v) => s + (Number(v) || 0), 0)
@@ -169,6 +170,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
   const totalMargemContribuicao = margemContribuicao.reduce((s, v) => s + (Number(v) || 0), 0)
   const totalEbitda = ebitda.reduce((s, v) => s + (Number(v) || 0), 0)
   const totalLucroOperacional = lucroOperacional.reduce((s, v) => s + (Number(v) || 0), 0)
+  const totalLucroLiquido = lucroLiquido.reduce((s, v) => s + (Number(v) || 0), 0)
 
   const computeTotal = (row) => {
     if (row.suffix === '%') {
@@ -177,6 +179,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
       if (row.label === 'Margem de Contribuição % / ROL') return totalRol ? (totalMargemContribuicao / totalRol) * 100 : 0
       if (row.label === 'EBITDA % / ROL') return totalRol ? (totalEbitda / totalRol) * 100 : 0
       if (row.label === 'Lucro Operacional % / ROL') return totalRol ? (totalLucroOperacional / totalRol) * 100 : 0
+      if (row.label === 'Lucro Líquido % / ROL') return totalRol ? (totalLucroLiquido / totalRol) * 100 : 0
       return 0
     }
     return row.values.reduce((s, v) => s + (Number(v) || 0), 0)
