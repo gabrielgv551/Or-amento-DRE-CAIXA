@@ -118,6 +118,8 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     expense: true,
   }))
 
+  const ebitda = margemContribuicao.map((v, i) => v - despesasFixas[i])
+
   const rows = [
     { label: 'ROB', values: receitaBrutaTotal, highlight: true },
     { label: 'Devoluções', values: devolucoes, sub: true, expense: true },
@@ -128,14 +130,15 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     { label: 'CMV', values: cmv, sub: true, expense: true },
     { label: 'Margem Bruta', values: margemBruta, highlight: true, bold: true },
     { label: 'Margem Bruta % / ROL', values: margemBruta.map((v, i) => rol[i] ? (v / rol[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
-    { label: 'Despesas Variáveis', values: totalDespesasVariaveis, bold: true, expense: true },
+    { label: 'Despesas Variáveis', values: totalDespesasVariaveis, group: true, bold: true, expense: true },
     { label: 'Ads', values: ads, sub: true, expense: true },
     { label: 'Frete', values: frete, sub: true, expense: true },
     { label: 'Comissão', values: comissao, sub: true, expense: true },
     { label: 'Margem de Contribuição', values: margemContribuicao, highlight: true, bold: true },
     { label: 'Margem de Contribuição % / ROL', values: margemContribuicao.map((v, i) => rol[i] ? (v / rol[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
-    { label: 'Despesas Fixas', values: despesasFixas, bold: true, expense: true },
+    { label: 'Despesas Fixas', values: despesasFixas, group: true, bold: true, expense: true },
     ...fixasRows,
+    { label: 'EBITDA', values: ebitda, highlight: true, bold: true },
     { label: 'Despesas Financeiras', values: despesasFinanceiras, sub: true, expense: true },
     { label: 'Total de Despesas', values: totalDespesas, bold: true, expense: true },
     { label: 'Lucro Líquido', values: resultado, bold: true, neg: true },
@@ -185,7 +188,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
                   </tr>
                 )
               }
-              if (row.costTotal) {
+              if (row.costTotal || row.group) {
                 return (
                   <tr key={row.label} className="border-t border-blue-200 bg-blue-100">
                     <td className="sticky left-0 bg-inherit z-10 px-3 py-2 text-xs font-bold text-blue-900 border-r border-blue-200">{row.label}</td>
