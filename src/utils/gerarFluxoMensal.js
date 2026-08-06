@@ -121,10 +121,15 @@ export function gerarFluxoMensal(data) {
     for (let m = 0; m < 12; m++) fornecedoresPag[m] += valor
   })
 
-  const divida = premissas.divida || {}
-  const parcelaDivida = Number(divida.parcela) || 0
-  const jurosDivida = parcelaDivida * (Number(divida.juros) || 0) / 100
-  const dividaPag = Array(12).fill(parcelaDivida + jurosDivida)
+  const dividas = premissas.dividas || (premissas.divida?.parcela || premissas.divida?.juros ? [premissas.divida] : [])
+  const dividaPag = Array(12).fill(0)
+  dividas.forEach(d => {
+    const parcela = Number(d.parcela) || 0
+    const juros = parcela * (Number(d.juros) || 0) / 100
+    const total = parcela + juros
+    if (total <= 0) return
+    for (let m = 0; m < 12; m++) dividaPag[m] += total
+  })
 
   const entradasNaoOp = Array(12).fill(0).map((_, m) => {
     let total = 0

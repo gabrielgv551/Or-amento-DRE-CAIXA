@@ -49,11 +49,7 @@ const initialData = {
     pagamentoFolha: 'mesSeguinte',
     saldoInicialReceber: 0,
     pctRecompraEstoque: 100,
-    divida: {
-      nome: 'Dívida',
-      parcela: 0,
-      juros: 0,
-    },
+    dividas: [],
   },
 }
 
@@ -80,19 +76,12 @@ function normalizeData(raw) {
     pagamentoFolha: 'mesSeguinte',
     saldoInicialReceber: 0,
     pctRecompraEstoque: 100,
-    divida: {
-      nome: 'Dívida',
-      parcela: 0,
-      juros: 0,
-    },
+    dividas: [],
     ...(data.premissasCaixa || {}),
   }
-  if (data.premissasCaixa.divida === undefined) {
-    data.premissasCaixa.divida = {
-      nome: 'Dívida',
-      parcela: 0,
-      juros: 0,
-    }
+  if (!Array.isArray(data.premissasCaixa.dividas)) {
+    const legado = data.premissasCaixa.divida || {}
+    data.premissasCaixa.dividas = legado.parcela || legado.juros ? [{ ...legado }] : []
   }
   return data
 }
