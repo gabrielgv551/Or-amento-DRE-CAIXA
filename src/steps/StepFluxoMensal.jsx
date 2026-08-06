@@ -31,7 +31,6 @@ export default function StepFluxoMensal({ data, back, restart, className }) {
     { label: 'Entradas Operacionais', values: fluxo.entradasOperacionais, group: true, bold: true },
     { label: 'Impostos', values: fluxo.impostosPagamento, sub: true, expense: true },
     { label: 'Pagamento Fornecedores (CMV)', values: fluxo.pagamentoFornecedores, sub: true, expense: true },
-    { label: 'Despesas Variáveis', values: fluxo.despesasVariaveis, sub: true, expense: true },
     { label: 'Despesas Fixas', values: fluxo.despesasFixasMes, sub: true, expense: true },
     { label: 'Folha de Pagamento', values: fluxo.folhaPagamento, sub: true, expense: true },
     { label: 'Outros Fornecedores', values: fluxo.fornecedoresPag, sub: true, expense: true },

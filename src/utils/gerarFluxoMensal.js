@@ -146,7 +146,7 @@ export function gerarFluxoMensal(data) {
 
   const entradasOperacionais = recebimentosVendas
   const saidasOperacionais = impostosPagamento.map((v, i) =>
-    v + pagamentoFornecedores[i] + despesasVariaveis[i] + despesasFixasMes[i] + folhaPagamento[i] + fornecedoresPag[i]
+    v + pagamentoFornecedores[i] + despesasFixasMes[i] + folhaPagamento[i] + fornecedoresPag[i]
   )
   const totalOperacional = entradasOperacionais.map((v, i) => v - saidasOperacionais[i])
 
