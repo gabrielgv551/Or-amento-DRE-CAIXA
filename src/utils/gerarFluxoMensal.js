@@ -130,23 +130,27 @@ export function gerarFluxoMensal(data) {
     for (let m = 0; m < 12; m++) dividasPag[m] += total
   })
 
-  const entradasNaoOp = Array(12).fill(0)
-  ;(naoOp.entradas || []).forEach(e => {
-    const valor = Number(e.valor) || 0
-    if (valor <= 0) return
-    for (let m = 0; m < 12; m++) entradasNaoOp[m] += valor
+  const entradasNaoOp = Array(12).fill(0).map((_, m) => {
+    let total = 0
+    ;(naoOp.entradas || []).forEach(e => {
+      const valor = Number(e.valor) || 0
+      if (valor > 0) total += valor
+    })
+    return total + receitasFinanceirasMes[m]
   })
 
-  const saidasNaoOp = Array(12).fill(0)
-  ;(naoOp.saidas || []).forEach(s => {
-    const valor = Number(s.valor) || 0
-    if (valor <= 0) return
-    for (let m = 0; m < 12; m++) saidasNaoOp[m] += valor
+  const saidasNaoOp = Array(12).fill(0).map((_, m) => {
+    let total = 0
+    ;(naoOp.saidas || []).forEach(s => {
+      const valor = Number(s.valor) || 0
+      if (valor > 0) total += valor
+    })
+    return total + despesasFinanceirasMes[m]
   })
 
-  const entradasOperacionais = recebimentosVendas.map((v, i) => v + receitasFinanceirasMes[i])
+  const entradasOperacionais = recebimentosVendas
   const saidasOperacionais = impostosPagamento.map((v, i) =>
-    v + pagamentoFornecedores[i] + despesasVariaveis[i] + despesasFixasMes[i] + despesasFinanceirasMes[i] + folhaPagamento[i] + dividasPag[i] + fornecedoresPag[i]
+    v + pagamentoFornecedores[i] + despesasVariaveis[i] + despesasFixasMes[i] + folhaPagamento[i] + dividasPag[i] + fornecedoresPag[i]
   )
   const totalOperacional = entradasOperacionais.map((v, i) => v - saidasOperacionais[i])
 
