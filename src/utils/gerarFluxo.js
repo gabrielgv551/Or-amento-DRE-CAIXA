@@ -259,6 +259,26 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
     })
   })
 
+  // ─── Pré-computa CMV por canal/dia ────────────────────────────────────────────
+  const cmvPag = {}
+  for (let i = 1; i <= diasNoMes; i++) cmvPag[i] = []
+
+  const custos = data.custos || {}
+  canais.forEach(canal => {
+    const nome = canal.nome || 'Canal'
+    const vendaBruta = Number(canal.meses?.[mesAtual]) || 0
+    if (vendaBruta <= 0) return
+    const pct = parsePct(custos[canal.id]) / 100
+    if (pct <= 0) return
+    const totalMensal = vendaBruta * pct
+    const diasU = diasUteisMes(anoAtual, mesAtual)
+    if (!diasU.length) return
+    const diario = totalMensal / diasU.length
+    diasU.forEach(dia => {
+      cmvPag[dia.getDate()].push({ descricao: `CMV ${nome}`, valor: diario })
+    })
+  })
+
   // ─── Pré-computa pagamentos de fornecedores por dia ─────────────────────────
   const fornecPag = {}
   for (let i = 1; i <= diasNoMes; i++) fornecPag[i] = []
@@ -317,7 +337,7 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
   for (let d = 1; d <= diasNoMes; d++) {
     const saldoInicialDia = saldoAcumulado
     const entradas = [...entregas[d], ...(receitasFinanceirasPag[d] || [])]
-    const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || []), ...(devolucaoPag[d] || []), ...(despesasVariaveisPag[d] || []), ...(despesasFixasPag[d] || []), ...(despesasFinanceirasPag[d] || [])]
+    const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || []), ...(devolucaoPag[d] || []), ...(despesasVariaveisPag[d] || []), ...(cmvPag[d] || []), ...(despesasFixasPag[d] || []), ...(despesasFinanceirasPag[d] || [])]
 
     data.dividas?.forEach(div => {
       if (Number(div.diaVencimento) === d && Number(div.parcela) > 0) {

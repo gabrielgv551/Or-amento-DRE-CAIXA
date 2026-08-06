@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import StepWelcome from './steps/StepWelcome'
 import StepFaturamento from './steps/StepFaturamento'
+import StepCustos from './steps/StepCustos'
 import StepFornecedores from './steps/StepFornecedores'
 import StepDespesasFixas from './steps/StepDespesasFixas'
 import StepDespesasFinanceiras from './steps/StepDespesasFinanceiras'
@@ -14,6 +15,7 @@ import { loadStorage, saveStorage } from './utils/storage'
 const STEPS = [
   'Boas-vindas',
   'Faturamento',
+  'Custos',
   'Despesas Variáveis',
   'Despesas Fixas',
   'Despesas Financeiras',
@@ -32,6 +34,7 @@ const initialData = {
   naoOperacional: { entradas: [], saidas: [] },
   despesasVariaveis: { ads: {}, frete: {}, comissao: {} },
   despesasFixas: [],
+  custos: {},
 }
 
 function normalizeData(raw) {
@@ -112,6 +115,7 @@ export default function App() {
   const stepComponents = [
     <StepWelcome key={animKey} className={stepClass} {...stepProps} />,
     <StepFaturamento key={animKey} className={stepClass} {...stepProps} />,
+    <StepCustos key={animKey} className={stepClass} {...stepProps} />,
     <StepFornecedores key={animKey} className={stepClass} {...stepProps} />,
     <StepDespesasFixas key={animKey} className={stepClass} {...stepProps} />,
     <StepDespesasFinanceiras key={animKey} className={stepClass} {...stepProps} />,

@@ -57,6 +57,16 @@ export default function StepDreFluxo({ data, back, restart, className }) {
 
   const rol = receitaBrutaTotal.map((v, i) => v - devolucoes[i] - impostos[i])
 
+  const cmv = Array(12).fill(0).map((_, m) =>
+    canais.reduce((s, c) => {
+      const v = Number(c.meses?.[m]) || 0
+      const pct = parsePct((data.custos || {})[c.id]) / 100
+      return s + v * pct
+    }, 0)
+  )
+
+  const margemBruta = rol.map((v, i) => v - cmv[i])
+
   const ads = Array(12).fill(0).map((_, m) =>
     canais.reduce((s, c) => {
       const v = Number(c.meses?.[m]) || 0
@@ -97,7 +107,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
 
   const resultado = rol.map((v, i) => v - totalDespesas[i])
 
-  const margemContribuicao = rol.map((v, i) => v - ads[i] - frete[i] - comissao[i])
+  const margemContribuicao = margemBruta.map((v, i) => v - ads[i] - frete[i] - comissao[i])
 
   const totalDespesasVariaveis = Array(12).fill(0).map((_, m) => ads[m] + frete[m] + comissao[m])
 
@@ -107,6 +117,8 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     { label: 'Impostos', values: impostos, sub: true },
     { label: 'ROL', values: rol, highlight: true },
     { label: 'ROL% sobre ROB', values: rol.map((v, i) => receitaBrutaTotal[i] ? (v / receitaBrutaTotal[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
+    { label: 'CMV', values: cmv, sub: true },
+    { label: 'Margem Bruta', values: margemBruta, bold: true },
     { label: 'Despesas Variáveis', values: totalDespesasVariaveis, header: true },
     { label: 'Ads', values: ads, sub: true },
     { label: 'Frete', values: frete, sub: true },
