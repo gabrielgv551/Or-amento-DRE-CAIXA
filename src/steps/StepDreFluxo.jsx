@@ -120,7 +120,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     { label: 'Custos', values: cmv, costTotal: true, expense: true },
     { label: 'CMV', values: cmv, sub: true, expense: true },
     { label: 'Margem Bruta', values: margemBruta, bold: true },
-    { label: 'Despesas Variáveis', values: totalDespesasVariaveis, header: true },
+    { label: 'Despesas Variáveis', values: totalDespesasVariaveis, bold: true, expense: true },
     { label: 'Ads', values: ads, sub: true, expense: true },
     { label: 'Frete', values: frete, sub: true, expense: true },
     { label: 'Comissão', values: comissao, sub: true, expense: true },
