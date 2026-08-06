@@ -21,6 +21,7 @@ const emptyCanal = (nome = '', leadTime = '14') => ({
   leadTime,
   aliquota: '0',
   meses: Array(12).fill(0),
+  crescimento: Array(12).fill(0),
 })
 
 function parseBRL(str) {
@@ -75,6 +76,46 @@ function MoneyCell({ value, onChange }) {
   )
 }
 
+function PctCell({ value, onChange }) {
+  const ref = useRef(null)
+  const [editing, setEditing] = React.useState(false)
+  const [raw, setRaw] = React.useState('')
+
+  const handleFocus = () => {
+    setRaw(value ? String(value) : '')
+    setEditing(true)
+    setTimeout(() => ref.current?.select(), 0)
+  }
+
+  const handleBlur = () => {
+    setEditing(false)
+    onChange(parsePct(raw))
+  }
+
+  const handleChange = (e) => {
+    setRaw(e.target.value)
+  }
+
+  return (
+    <div className="relative w-full">
+      <input
+        ref={ref}
+        type="text"
+        inputMode="decimal"
+        value={editing ? raw : (value ? String(value) : '')}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        placeholder="0"
+        className="w-full bg-transparent border border-transparent hover:border-slate-200 focus:border-blue-500 focus:bg-slate-100 rounded px-1.5 py-1 text-slate-900 text-xs text-center placeholder-slate-400 focus:outline-none transition min-w-[90px]"
+      />
+      {!editing && value !== '' && value !== undefined && value !== null && (
+        <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">%</span>
+      )}
+    </div>
+  )
+}
+
 export default function StepFaturamento({ data, updateData, next, back, className }) {
   const canais      = data.canais || []
   const visibleMeses = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -88,38 +129,62 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
   const changeCanal = (id, field, value) =>
     updateData('canais', canais.map(c => c.id === id ? { ...c, [field]: value } : c))
 
-  const changeMesValor = (id, mesIdx, valor) =>
-    updateData('canais', canais.map(c => {
-      if (c.id !== id) return c
-      const meses = [...c.meses]
-      meses[mesIdx] = valor
-      return { ...c, meses }
-    }))
-
   const totalCanal = (canal) => canal.meses.reduce((s, v) => s + (Number(v) || 0), 0)
 
   const vendasDiariasCanal = (canal) => {
-    const totalDias = DIAS_POR_MES.reduce((s, d) => s + d, 0)
-    if (totalDias <= 0) return 0
-    return totalCanal(canal) / totalDias
+    const diasJaneiro = DIAS_POR_MES[0]
+    if (!diasJaneiro) return 0
+    return (Number(canal.meses?.[0]) || 0) / diasJaneiro
+  }
+
+  const calcularMesesPorCrescimento = (c, valorDiario) => {
+    const crescimento = Array.isArray(c.crescimento) ? c.crescimento : Array(12).fill(0)
+    const meses = Array(12).fill(0)
+    meses[0] = Math.round(valorDiario * DIAS_POR_MES[0])
+    for (let i = 1; i < 12; i++) {
+      const pct = Number(crescimento[i]) || 0
+      meses[i] = Math.round(meses[i - 1] * (1 + pct / 100))
+    }
+    return meses
+  }
+
+  const calcularCrescimentoPorMes = (meses, mesIdx) => {
+    if (mesIdx === 0) return 0
+    const anterior = Number(meses[mesIdx - 1]) || 0
+    const atual = Number(meses[mesIdx]) || 0
+    if (anterior === 0) return 0
+    return ((atual - anterior) / anterior) * 100
   }
 
   const changeVendasDiarias = (id, valorDiario) => {
     updateData('canais', canais.map(c => {
       if (c.id !== id) return c
-      const meses = DIAS_POR_MES.map(d => Math.round(valorDiario * d))
-      return { ...c, meses }
+      return { ...c, meses: calcularMesesPorCrescimento(c, valorDiario) }
     }))
   }
 
+  const changeCrescimento = (id, mesIdx, pct) => {
+    updateData('canais', canais.map(c => {
+      if (c.id !== id) return c
+      const crescimento = [...(Array.isArray(c.crescimento) ? c.crescimento : Array(12).fill(0))]
+      crescimento[mesIdx] = pct
+      const valorDiario = vendasDiariasCanal(c)
+      return { ...c, crescimento, meses: calcularMesesPorCrescimento({ ...c, crescimento }, valorDiario) }
+    }))
+  }
+
+  const changeMesValor = (id, mesIdx, valor) =>
+    updateData('canais', canais.map(c => {
+      if (c.id !== id) return c
+      const meses = [...c.meses]
+      meses[mesIdx] = valor
+      const crescimento = [...(Array.isArray(c.crescimento) ? c.crescimento : Array(12).fill(0))]
+      crescimento[mesIdx] = calcularCrescimentoPorMes(meses, mesIdx)
+      return { ...c, meses, crescimento }
+    }))
+
   const crescimentoCanal = (canal) => {
-    return canal.meses.map((v, i) => {
-      if (i === 0) return 0
-      const anterior = Number(canal.meses[i - 1]) || 0
-      const atual = Number(v) || 0
-      if (anterior === 0) return 0
-      return ((atual - anterior) / anterior) * 100
-    })
+    return Array.isArray(canal.crescimento) ? canal.crescimento : Array(12).fill(0)
   }
 
   const fmtPercent = (v) => {
@@ -352,12 +417,25 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                       {visibleMeses.map((mesIdx, col) => {
                         const v = crescimento[mesIdx]
                         const color = v > 0 ? 'text-emerald-600' : v < 0 ? 'text-rose-600' : 'text-slate-500'
+                        if (mesIdx === 0) {
+                          return (
+                            <td
+                              key={mesIdx}
+                              className={`px-1 py-1 text-center text-xs text-slate-400 ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
+                            >
+                              -
+                            </td>
+                          )
+                        }
                         return (
                           <td
                             key={mesIdx}
-                            className={`px-1 py-1 text-center text-xs font-medium ${color} ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
+                            className={`px-1 py-1 ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
                           >
-                            {v > 0 ? '+' : ''}{fmtPercent(v)}
+                            <PctCell
+                              value={v}
+                              onChange={pct => changeCrescimento(canal.id, mesIdx, pct)}
+                            />
                           </td>
                         )
                       })}
