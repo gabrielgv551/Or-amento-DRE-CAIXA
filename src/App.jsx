@@ -21,7 +21,6 @@ const STEPS = [
   'Custos',
   'Despesas Variáveis',
   'Despesas Fixas',
-  'Despesas Financeiras',
   'Regime Fiscal',
   'DRE',
   'Premissas Caixa',
@@ -35,7 +34,6 @@ const initialData = {
   deducaoDevolucao: '0',
   fornecedores: [],
   dividas: [],
-  outros: [],
   receitasFinanceiras: [],
   emprestimos: [],
   naoOperacional: { entradas: [], saidas: [] },
@@ -51,6 +49,11 @@ const initialData = {
     pagamentoFolha: 'mesSeguinte',
     saldoInicialReceber: 0,
     pctRecompraEstoque: 100,
+    divida: {
+      nome: 'Dívida',
+      parcela: 0,
+      juros: 0,
+    },
   },
 }
 
@@ -77,7 +80,19 @@ function normalizeData(raw) {
     pagamentoFolha: 'mesSeguinte',
     saldoInicialReceber: 0,
     pctRecompraEstoque: 100,
+    divida: {
+      nome: 'Dívida',
+      parcela: 0,
+      juros: 0,
+    },
     ...(data.premissasCaixa || {}),
+  }
+  if (data.premissasCaixa.divida === undefined) {
+    data.premissasCaixa.divida = {
+      nome: 'Dívida',
+      parcela: 0,
+      juros: 0,
+    }
   }
   return data
 }

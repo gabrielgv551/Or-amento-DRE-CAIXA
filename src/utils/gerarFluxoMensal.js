@@ -29,12 +29,10 @@ export function gerarFluxoMensal(data) {
   const canais = data.canais || []
   const receitasFinanceiras = data.receitasFinanceiras || []
   const despesasFixas = data.despesasFixas || []
-  const financeiras = data.outros || []
   const dv = data.despesasVariaveis || { ads: {}, frete: {}, comissao: {} }
   const custos = data.custos || {}
   const premissas = data.premissasCaixa || {}
   const pessoal = Number(data.pessoal?.total) || 0
-  const dividas = data.dividas || []
   const fornecedores = data.fornecedores || []
   const naoOp = data.naoOperacional || { entradas: [], saidas: [] }
   const saldoInicial = Number(data.saldoInicial) || 0
@@ -96,10 +94,6 @@ export function gerarFluxoMensal(data) {
     despesasFixas.reduce((s, f) => s + (Number((f.meses || [])[m]) || 0), 0)
   )
 
-  const despesasFinanceirasMes = Array(12).fill(0).map((_, m) =>
-    financeiras.reduce((s, f) => s + (Number((f.meses || [])[m]) || 0), 0)
-  )
-
   const { entradas: emprestimosEntradas, amortizacoes: emprestimosAmortizacoes, juros: emprestimosJuros } = calcularEmprestimos(data.emprestimos)
 
   const folhaBase = Array(12).fill(pessoal)
@@ -110,7 +104,7 @@ export function gerarFluxoMensal(data) {
   const impostosPagamento = calcImpostosPagamento(impostos, premissas.recolhimentoImpostos)
 
   const pmrShift = Math.round((Number(premissas.pmr) || 0) / 30)
-  const vendasLiquidas = receitaBrutaTotal.map((v, i) => v - (Number(devolucao[i]) || 0))
+  const vendasLiquidas = receitaBruta.map((v, i) => v - (Number(devolucao[i]) || 0) - despesasVariaveis[i])
   const recebimentosVendas = shiftArray(vendasLiquidas, pmrShift)
   recebimentosVendas[0] += Number(premissas.saldoInicialReceber) || 0
 
@@ -127,14 +121,10 @@ export function gerarFluxoMensal(data) {
     for (let m = 0; m < 12; m++) fornecedoresPag[m] += valor
   })
 
-  const dividasPag = Array(12).fill(0)
-  dividas.forEach(d => {
-    const parcela = Number(d.parcela) || 0
-    const juros = parcela * (Number(d.juros) || 0) / 100
-    const total = parcela + juros
-    if (total <= 0) return
-    for (let m = 0; m < 12; m++) dividasPag[m] += total
-  })
+  const divida = premissas.divida || {}
+  const parcelaDivida = Number(divida.parcela) || 0
+  const jurosDivida = parcelaDivida * (Number(divida.juros) || 0) / 100
+  const dividaPag = Array(12).fill(parcelaDivida + jurosDivida)
 
   const entradasNaoOp = Array(12).fill(0).map((_, m) => {
     let total = 0
@@ -151,12 +141,12 @@ export function gerarFluxoMensal(data) {
       const valor = Number(s.valor) || 0
       if (valor > 0) total += valor
     })
-    return total + despesasFinanceirasMes[m] + emprestimosAmortizacoes[m] + emprestimosJuros[m]
+    return total + dividaPag[m] + emprestimosAmortizacoes[m] + emprestimosJuros[m]
   })
 
   const entradasOperacionais = recebimentosVendas
   const saidasOperacionais = impostosPagamento.map((v, i) =>
-    v + pagamentoFornecedores[i] + despesasVariaveis[i] + despesasFixasMes[i] + folhaPagamento[i] + dividasPag[i] + fornecedoresPag[i]
+    v + pagamentoFornecedores[i] + despesasVariaveis[i] + despesasFixasMes[i] + folhaPagamento[i] + fornecedoresPag[i]
   )
   const totalOperacional = entradasOperacionais.map((v, i) => v - saidasOperacionais[i])
 
@@ -181,9 +171,8 @@ export function gerarFluxoMensal(data) {
     pagamentoFornecedores,
     despesasVariaveis,
     despesasFixasMes,
-    despesasFinanceirasMes,
     folhaPagamento,
-    dividasPag,
+    dividaPag,
     fornecedoresPag,
     saidasOperacionais,
     totalOperacional,

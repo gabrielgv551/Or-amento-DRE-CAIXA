@@ -191,6 +191,56 @@ export default function StepPremissasCaixa({ data, updateData, next, back, class
         </div>
       </div>
 
+      <div className="max-w-4xl mx-auto mb-8">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-md">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="text-2xl">💳</div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Dívida / Parcela Não Operacional</h3>
+              <p className="text-xs text-slate-500">Pagamento mensal de empréstimo, cartão ou financiamento</p>
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Nome</label>
+              <input
+                type="text"
+                value={premissas.divida?.nome ?? 'Dívida'}
+                onChange={e => update('divida', { ...premissas.divida, nome: e.target.value })}
+                className="w-full bg-transparent border-b border-slate-300 text-center text-slate-900 py-2 outline-none transition focus:border-cyan-500 focus:bg-blue-50/50 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Parcela/mês</label>
+              <CurrencyInput
+                value={premissas.divida?.parcela ?? 0}
+                onChange={v => update('divida', { ...premissas.divida, parcela: v })}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Juros %</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={premissas.divida?.juros ?? 0}
+                  onChange={e => update('divida', { ...premissas.divida, juros: Number(e.target.value) })}
+                  className={inputClass}
+                />
+                <span className="absolute right-0 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
+              </div>
+            </div>
+          </div>
+          {premissas.divida?.parcela > 0 && premissas.divida?.juros > 0 && (
+            <div className="mt-4 text-xs text-amber-700/80 bg-amber-50 rounded-lg px-3 py-2">
+              🔥 Juros mensais: R$ {((premissas.divida.parcela * premissas.divida.juros) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="flex gap-3 mt-4 max-w-lg mx-auto">
         <button
           onClick={back}
