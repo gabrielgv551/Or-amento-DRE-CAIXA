@@ -25,9 +25,9 @@ export default function StepWelcome({ next, setMode, className }) {
         {[
           { icon: '📊', label: 'Faturamento' },
           { icon: '🏭', label: 'Despesas Variáveis' },
-          { icon: '💳', label: 'Dívidas' },
-          { icon: '👥', label: 'Pessoal' },
-          { icon: '📋', label: 'Outros' },
+          { icon: '🏢', label: 'Despesas Fixas' },
+          { icon: '💳', label: 'Despesas Financeiras' },
+          { icon: '🏦', label: 'Não Operacional' },
           { icon: '📈', label: 'Resultado' },
         ].map(({ icon, label }) => (
           <div key={label} className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col items-center gap-1 hover:border-orange-400 transition">

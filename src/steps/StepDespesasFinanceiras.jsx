@@ -3,16 +3,18 @@ import Card from '../components/Card'
 import InputMoney from '../components/InputMoney'
 
 const SUGESTOES = [
-  { nome: 'Marketing / Ads', icone: '📢' },
-  { nome: 'Frete / logística', icone: '📦' },
-  { nome: 'Prestador de Serviços PJ', icone: '🤝' },
-  { nome: 'Material de escritório', icone: '📎' },
-  { nome: 'Viagens / hospedagem', icone: '✈️' },
+  { nome: 'Juros', icone: '📈' },
+  { nome: 'Parcela de empréstimo', icone: '💳' },
+  { nome: 'Tarifas bancárias', icone: '🏦' },
+  { nome: 'IOF', icone: '📉' },
+  { nome: 'Cartão de crédito', icone: '💳' },
+  { nome: 'Impostos atrasados', icone: '🏛️' },
+  { nome: 'Multas', icone: '⚠️' },
 ]
 
 const empty = (nome = '') => ({ id: Date.now() + Math.random(), nome, valor: '', diaVencimento: '' })
 
-export default function StepOutros({ data, updateData, next, back, className }) {
+export default function StepDespesasFinanceiras({ data, updateData, next, back, className }) {
   const lista = data.outros
 
   const add = (nome = '') => updateData('outros', [...lista, empty(nome)])
@@ -24,10 +26,10 @@ export default function StepOutros({ data, updateData, next, back, className }) 
   return (
     <div className={`w-full max-w-lg ${className}`}>
       <Card className="p-8">
-        <div className="text-4xl mb-4 text-center">📋</div>
-        <h2 className="text-2xl font-bold text-slate-900 text-center mb-2">Outras Despesas</h2>
+        <div className="text-4xl mb-4 text-center">💳</div>
+        <h2 className="text-2xl font-bold text-slate-900 text-center mb-2">Despesas Financeiras</h2>
         <p className="text-slate-500 text-sm text-center mb-4">
-          Aluguel, marketing, assinaturas, contas fixas...
+          Juros, tarifas, parcelas, impostos atrasados e outras despesas financeiras
         </p>
 
         <div className="flex flex-wrap gap-2 mb-4">
@@ -90,7 +92,7 @@ export default function StepOutros({ data, updateData, next, back, className }) 
           onClick={() => add()}
           className="w-full mt-4 py-2.5 border border-dashed border-slate-300 rounded-xl text-slate-400 hover:text-slate-900 hover:border-blue-400 transition text-sm font-medium flex items-center justify-center gap-2"
         >
-          <span className="text-lg">+</span> Adicionar despesa manualmente
+          <span className="text-lg">+</span> Adicionar despesa financeira manualmente
         </button>
 
         <div className="flex gap-3 mt-6">

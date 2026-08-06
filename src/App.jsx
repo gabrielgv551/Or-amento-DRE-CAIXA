@@ -3,10 +3,8 @@ import StepWelcome from './steps/StepWelcome'
 import StepFaturamento from './steps/StepFaturamento'
 import StepFornecedores from './steps/StepFornecedores'
 import StepDespesasFixas from './steps/StepDespesasFixas'
-import StepPessoal from './steps/StepPessoal'
-import StepOutros from './steps/StepOutros'
-import StepNaoOperacional from './steps/StepNaoOperacional'
-import StepResultado from './steps/StepResultado'
+import StepDespesasFinanceiras from './steps/StepDespesasFinanceiras'
+import StepDreFluxo from './steps/StepDreFluxo'
 import StepMargem from './steps/StepMargem'
 import StepDre from './steps/StepDre'
 import StepPmv from './steps/StepPmv'
@@ -18,10 +16,8 @@ const STEPS = [
   'Faturamento',
   'Despesas Variáveis',
   'Despesas Fixas',
-  'Pessoal',
-  'Outros',
-  'Não Operacional',
-  'Resultado',
+  'Despesas Financeiras',
+  'DRE',
 ]
 
 const initialData = {
@@ -31,7 +27,6 @@ const initialData = {
   deducaoDevolucao: '0',
   fornecedores: [],
   dividas: [],
-  pessoal: { total: '', diaPagamento: '5' },
   outros: [],
   naoOperacional: { entradas: [], saidas: [] },
   despesasVariaveis: { ads: {}, frete: {}, comissao: {} },
@@ -110,8 +105,7 @@ export default function App() {
     <StepFaturamento key={animKey} className={stepClass} {...stepProps} />,
     <StepFornecedores key={animKey} className={stepClass} {...stepProps} />,
     <StepDespesasFixas key={animKey} className={stepClass} {...stepProps} />,
-    <StepPessoal key={animKey} className={stepClass} {...stepProps} />,
-    <StepOutros key={animKey} className={stepClass} {...stepProps} />,
+    <StepDespesasFinanceiras key={animKey} className={stepClass} {...stepProps} />,
     <StepNaoOperacional key={animKey} className={stepClass} {...stepProps} />,
     <StepResultado key={animKey} className={stepClass} {...stepProps} />,
   ]

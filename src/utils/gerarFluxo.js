@@ -297,25 +297,9 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
       }
     })
 
-    const pessoal = data.pessoal
-    if (pessoal && !Array.isArray(pessoal)) {
-      if (Number(pessoal.diaPagamento) === d && Number(pessoal.total) > 0)
-        saidas.push({ descricao: 'Folha de Pagamento', valor: Number(pessoal.total) })
-    } else {
-      ;(pessoal || []).forEach(p => {
-        if (Number(p.diaPagamento) === d && Number(p.salario) > 0)
-          saidas.push({ descricao: p.nome || 'Colaborador', valor: Number(p.salario) })
-      })
-    }
-
     data.outros?.forEach(o => {
       if (Number(o.diaVencimento) === d && Number(o.valor) > 0)
-        saidas.push({ descricao: o.nome || 'Despesa', valor: Number(o.valor) })
-    })
-
-    data.despesasFixas?.forEach(o => {
-      if (Number(o.diaVencimento) === d && Number(o.valor) > 0)
-        saidas.push({ descricao: o.nome || 'Despesa Fixa', valor: Number(o.valor) })
+        saidas.push({ descricao: o.nome || 'Despesa Financeira', valor: Number(o.valor) })
     })
 
     const entradasNaoOp = []
