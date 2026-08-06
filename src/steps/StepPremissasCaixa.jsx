@@ -75,6 +75,25 @@ export default function StepPremissasCaixa({ data, updateData, next, back, class
 
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-md">
           <label className="block text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
+            % de Recompra do Estoque
+          </label>
+          <div className="relative">
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              value={premissas.pctRecompraEstoque ?? ''}
+              onChange={e => update('pctRecompraEstoque', Number(e.target.value))}
+              className={inputClass}
+            />
+            <span className="absolute right-0 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
+          </div>
+          <p className="mt-2 text-xs text-slate-400">Quanto do CMV a empresa precisa recomprar (ex: 80%)</p>
+        </div>
+
+        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-md">
+          <label className="block text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
             Saldo Inicial de Caixa
           </label>
           <div className="relative">

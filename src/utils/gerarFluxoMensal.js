@@ -112,7 +112,8 @@ export function gerarFluxoMensal(data) {
   const pmpShift = Math.round((Number(premissas.pmp) || 0) / 30)
   const coberturaShift = Math.round((Number(premissas.coberturaEstoque) || 0) / 30)
   const netCompraShift = pmpShift - coberturaShift
-  const pagamentoFornecedores = shiftArray(cmv, netCompraShift)
+  const pctRecompra = Math.max(0, Math.min(100, Number(premissas.pctRecompraEstoque) ?? 100)) / 100
+  const pagamentoFornecedores = shiftArray(cmv, netCompraShift).map(v => v * pctRecompra)
 
   const fornecedoresPag = Array(12).fill(0)
   fornecedores.forEach(f => {

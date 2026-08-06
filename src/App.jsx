@@ -49,6 +49,7 @@ const initialData = {
     recolhimentoImpostos: 'mesmoMes',
     pagamentoFolha: 'mesSeguinte',
     saldoInicialReceber: 0,
+    pctRecompraEstoque: 100,
   },
 }
 
@@ -73,6 +74,7 @@ function normalizeData(raw) {
     recolhimentoImpostos: 'mesmoMes',
     pagamentoFolha: 'mesSeguinte',
     saldoInicialReceber: 0,
+    pctRecompraEstoque: 100,
     ...(data.premissasCaixa || {}),
   }
   return data
