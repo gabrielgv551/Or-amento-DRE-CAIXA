@@ -4,7 +4,7 @@ const MESES_FULL = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
 
 function fmtBRL(v) {
   if (!v && v !== 0) return ''
-  return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 }
 
 function parsePct(str) {
@@ -144,8 +144,8 @@ export default function StepDreFluxo({ data, back, restart, className }) {
                 : row.values.reduce((s, v) => s + (Number(v) || 0), 0)
               if (row.header) {
                 return (
-                  <tr key={row.label} className="bg-slate-100">
-                    <td className="px-3 py-2 text-xs font-bold text-slate-900 border-r border-slate-200" colSpan={14}>{row.label}</td>
+                  <tr key={row.label} className="bg-blue-100">
+                    <td className="px-3 py-2 text-xs font-bold text-blue-900 border-r border-blue-200" colSpan={14}>{row.label}</td>
                   </tr>
                 )
               }
