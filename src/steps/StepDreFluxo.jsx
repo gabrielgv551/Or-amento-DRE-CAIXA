@@ -40,15 +40,17 @@ export default function StepDreFluxo({ data, back, restart, className }) {
 
   const receitaBrutaTotal = receitaBruta.map((v, i) => v + receitasFinanceirasMes[i])
 
-  const deducoes = Array(12).fill(0).map((_, m) =>
+  const devolucoes = Array(12).fill(0).map((_, m) => Number((data.devolucao || [])[m]) || 0)
+
+  const impostos = Array(12).fill(0).map((_, m) =>
     canais.reduce((s, c) => {
       const v = Number(c.meses?.[m]) || 0
-      const pct = parsePct(c.deducao) / 100
+      const pct = parsePct(c.aliquota) / 100
       return s + v * pct
     }, 0)
   )
 
-  const rol = receitaBrutaTotal.map((v, i) => v - deducoes[i])
+  const rol = receitaBrutaTotal.map((v, i) => v - devolucoes[i] - impostos[i])
 
   const ads = Array(12).fill(0).map((_, m) =>
     canais.reduce((s, c) => {
@@ -94,7 +96,8 @@ export default function StepDreFluxo({ data, back, restart, className }) {
 
   const rows = [
     { label: 'ROB', values: receitaBrutaTotal, highlight: true },
-    { label: 'Deduções dos canais', values: deducoes, sub: true },
+    { label: 'Devoluções', values: devolucoes, sub: true },
+    { label: 'Impostos', values: impostos, sub: true },
     { label: 'ROL', values: rol, bold: true },
     { label: 'Despesas Variáveis', values: Array(12).fill(0), header: true },
     { label: 'Ads', values: ads, sub: true },
