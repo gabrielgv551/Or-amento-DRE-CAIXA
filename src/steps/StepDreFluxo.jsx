@@ -113,21 +113,22 @@ export default function StepDreFluxo({ data, back, restart, className }) {
 
   const rows = [
     { label: 'ROB', values: receitaBrutaTotal, highlight: true },
-    { label: 'Devoluções', values: devolucoes, sub: true },
-    { label: 'Impostos', values: impostos, sub: true },
+    { label: 'Devoluções', values: devolucoes, sub: true, expense: true },
+    { label: 'Impostos', values: impostos, sub: true, expense: true },
     { label: 'ROL', values: rol, highlight: true },
     { label: 'ROL% sobre ROB', values: rol.map((v, i) => receitaBrutaTotal[i] ? (v / receitaBrutaTotal[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
-    { label: 'CMV', values: cmv, sub: true },
+    { label: 'Custos', values: cmv, costTotal: true, expense: true },
+    { label: 'CMV', values: cmv, sub: true, expense: true },
     { label: 'Margem Bruta', values: margemBruta, bold: true },
     { label: 'Despesas Variáveis', values: totalDespesasVariaveis, header: true },
-    { label: 'Ads', values: ads, sub: true },
-    { label: 'Frete', values: frete, sub: true },
-    { label: 'Comissão', values: comissao, sub: true },
+    { label: 'Ads', values: ads, sub: true, expense: true },
+    { label: 'Frete', values: frete, sub: true, expense: true },
+    { label: 'Comissão', values: comissao, sub: true, expense: true },
     { label: 'Margem de Contribuição', values: margemContribuicao, bold: true },
-    { label: 'Despesas Fixas', values: despesasFixas, sub: true },
-    { label: 'Despesas Financeiras', values: despesasFinanceiras, sub: true },
-    { label: 'Total de Despesas', values: totalDespesas, bold: true },
-    { label: 'Resultado', values: resultado, bold: true, neg: true },
+    { label: 'Despesas Fixas', values: despesasFixas, sub: true, expense: true },
+    { label: 'Despesas Financeiras', values: despesasFinanceiras, sub: true, expense: true },
+    { label: 'Total de Despesas', values: totalDespesas, bold: true, expense: true },
+    { label: 'Lucro Líquido', values: resultado, bold: true, neg: true },
   ]
 
   return (
@@ -163,16 +164,27 @@ export default function StepDreFluxo({ data, back, restart, className }) {
                   </tr>
                 )
               }
+              if (row.costTotal) {
+                return (
+                  <tr key={row.label} className="border-t border-blue-200 bg-blue-100">
+                    <td className="sticky left-0 bg-inherit z-10 px-3 py-2 text-xs font-bold text-blue-900 border-r border-blue-200">{row.label}</td>
+                    {row.values.map((v, i) => (
+                      <ValorCell key={i} value={row.expense ? -v : v} bold highlight={false} neg={false} italic={false} suffix={row.suffix} />
+                    ))}
+                    <td className="px-2 py-2 text-right text-xs font-bold text-blue-900 border-l border-blue-200/50">{row.suffix === '%' ? fmtPercent(total) : fmtBRL(row.expense ? -total : total)}</td>
+                  </tr>
+                )
+              }
               return (
                 <tr key={row.label} className={`border-t border-slate-200 ${row.highlight ? 'bg-blue-900 text-white' : idx % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'} ${row.bold && !row.highlight ? 'bg-blue-50/50' : ''}`}>
                   <td className={`sticky left-0 bg-inherit z-10 px-3 py-2 text-xs border-r border-slate-200 ${row.highlight ? 'font-bold text-white' : row.bold ? 'font-bold text-slate-900' : row.sub ? 'text-slate-500 pl-6' : 'font-semibold text-slate-700'} ${row.italic ? 'italic' : ''}`}>
                     {row.label}
                   </td>
                   {row.values.map((v, i) => (
-                    <ValorCell key={i} value={v} bold={row.bold} neg={row.neg} highlight={row.highlight} italic={row.italic} suffix={row.suffix} />
+                    <ValorCell key={i} value={row.expense ? -v : v} bold={row.bold} neg={row.neg} highlight={row.highlight} italic={row.italic} suffix={row.suffix} />
                   ))}
                   <td className={`px-2 py-2 text-right text-xs border-l border-slate-200/50 ${row.highlight ? 'font-bold text-white' : row.bold ? 'font-bold text-slate-900' : 'text-slate-700'} ${row.italic ? 'italic' : ''}`}>
-                    {row.suffix === '%' ? fmtPercent(total) : fmtBRL(total)}
+                    {row.suffix === '%' ? fmtPercent(total) : fmtBRL(row.expense ? -total : total)}
                   </td>
                 </tr>
               )
