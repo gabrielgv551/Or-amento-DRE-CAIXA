@@ -1,4 +1,5 @@
 import React from 'react'
+import * as XLSX from 'xlsx'
 
 const MESES_FULL = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
@@ -185,6 +186,20 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     return row.values.reduce((s, v) => s + (Number(v) || 0), 0)
   }
 
+  const handleExportExcel = () => {
+    const aoa = [['Descrição', ...MESES_FULL.map((m) => m.substring(0, 3)), 'Total Ano']]
+    rows.forEach((row) => {
+      if (row.header) return
+      const total = computeTotal(row)
+      const fmt = (v) => (row.suffix === '%' ? fmtPercent(v) : fmtBRL(row.expense ? -v : v))
+      aoa.push([row.label, ...row.values.map(fmt), row.suffix === '%' ? fmtPercent(total) : fmtBRL(row.expense ? -total : total)])
+    })
+    const ws = XLSX.utils.aoa_to_sheet(aoa)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'DRE')
+    XLSX.writeFile(wb, 'DRE.xlsx')
+  }
+
   return (
     <div className={`w-full max-w-[98vw] px-2 ${className}`}>
       <div className="text-center mb-4">
@@ -245,6 +260,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
 
       <div className="flex gap-3 mt-4 max-w-lg mx-auto">
         <button onClick={back} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 transition font-medium text-sm">← Voltar</button>
+        <button onClick={handleExportExcel} className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/20 text-sm">📥 Excel</button>
         <button onClick={restart} className="flex-[2] bg-blue-500 hover:bg-blue-400 text-slate-900 font-bold py-3 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20 text-sm">Novo orçamento</button>
       </div>
     </div>
