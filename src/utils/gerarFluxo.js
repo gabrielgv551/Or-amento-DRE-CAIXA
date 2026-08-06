@@ -98,6 +98,7 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
   const anoAtual = targetAno ?? hoje.getFullYear()
   const mesAtual = targetMes ?? hoje.getMonth()
   const diasNoMes = new Date(anoAtual, mesAtual + 1, 0).getDate()
+  const diasUteisAtual = diasUteisMes(anoAtual, mesAtual)
 
   const canais = data.canais || []
 
@@ -284,7 +285,6 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
   for (let i = 1; i <= diasNoMes; i++) despesasFixasPag[i] = []
 
   const df = data.despesasFixas || []
-  const diasUteisAtual = diasUteisMes(anoAtual, mesAtual)
   df.forEach(despesa => {
     const nome = despesa.nome || 'Despesa Fixa'
     const valorMes = Number(despesa.meses?.[mesAtual]) || 0
@@ -316,7 +316,7 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
 
   for (let d = 1; d <= diasNoMes; d++) {
     const saldoInicialDia = saldoAcumulado
-    const entradas = [...entregas[d]]
+    const entradas = [...entregas[d], ...(receitasFinanceirasPag[d] || [])]
     const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || []), ...(devolucaoPag[d] || []), ...(despesasVariaveisPag[d] || []), ...(despesasFixasPag[d] || []), ...(despesasFinanceirasPag[d] || [])]
 
     data.dividas?.forEach(div => {
