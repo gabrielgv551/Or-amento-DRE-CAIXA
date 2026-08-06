@@ -67,7 +67,7 @@ export default function StepFluxoMensal({ data, updateData, back, restart, class
     { label: 'Recebimentos de Vendas', values: fluxo.recebimentosVendas, sub: true },
     { label: 'Entradas Operacionais', values: fluxo.entradasOperacionais, group: true, bold: true },
     { label: 'Impostos', values: fluxo.impostosPagamento, sub: true, expense: true },
-    { label: 'Pagamento Fornecedores (CMV)', values: fluxo.pagamentoFornecedores, sub: true, expense: true },
+    { label: 'Pagamento Fornecedores (Compras)', values: fluxo.pagamentoFornecedores, sub: true, expense: true },
     { label: 'Despesas Fixas', values: fluxo.despesasFixasMes, sub: true, expense: true },
     { label: 'Folha de Pagamento', values: fluxo.folhaPagamento, sub: true, expense: true },
     { label: 'Outros Fornecedores', values: fluxo.fornecedoresPag, sub: true, expense: true },

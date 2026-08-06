@@ -114,15 +114,18 @@ export function gerarFluxoMensal(data) {
 
   const pmpShift = Math.round((Number(premissas.pmp) || 0) / 30)
   const coberturaMes = (Number(premissas.coberturaEstoque) || 0) / 30
-  const pctRecompra = Math.max(0, Math.min(100, Number(premissas.pctRecompraEstoque) ?? 100)) / 100
+  const estoqueInicial = Number(premissas.estoqueInicial) || 0
 
   const estoqueMensal = cmv.map(v => v * coberturaMes)
+  let estoqueAtual = estoqueInicial
   const compras = cmv.map((v, i) => {
-    const estoqueAtual = estoqueMensal[i] || 0
-    const estoqueAnterior = i > 0 ? (estoqueMensal[i - 1] || 0) : estoqueAtual
-    return v + (estoqueAtual - estoqueAnterior)
+    const desejado = estoqueMensal[i] || 0
+    const compra = v + desejado - estoqueAtual
+    const compraReal = Math.max(0, compra)
+    estoqueAtual = estoqueAtual + compraReal - v
+    return compraReal
   })
-  const pagamentoFornecedores = shiftArray(compras, pmpShift).map(v => v * pctRecompra)
+  const pagamentoFornecedores = shiftArray(compras, pmpShift)
 
   const fornecedoresPag = Array(12).fill(0)
   fornecedores.forEach(f => {
