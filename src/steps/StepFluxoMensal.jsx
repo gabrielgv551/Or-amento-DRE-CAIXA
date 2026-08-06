@@ -172,13 +172,36 @@ export default function StepFluxoMensal({ data, updateData, back, restart, class
         <button onClick={restart} className="flex-[2] bg-blue-500 hover:bg-blue-400 text-slate-900 font-bold py-3 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20 text-sm">🔄 Recomeçar</button>
       </div>
 
-      <div className="max-w-lg mx-auto mt-3">
+      <div className="max-w-lg mx-auto mt-3 space-y-3">
         <button
           onClick={openModal}
           className="w-full py-3 rounded-xl border border-dashed border-blue-400 text-blue-600 hover:bg-blue-50 hover:border-blue-500 transition font-medium text-sm"
         >
           + Tomar Empréstimo
         </button>
+
+        {(data.emprestimos || []).length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Empréstimos simulados</h4>
+            {(data.emprestimos || []).map((e) => (
+              <div key={e.id} className="flex items-center justify-between bg-white rounded-xl border border-slate-200 px-4 py-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{e.nome || 'Empréstimo'}</p>
+                  <p className="text-xs text-slate-500">
+                    {fmtBRL(e.principal)} · {e.prazo}x · {Number(e.taxa).toLocaleString('pt-BR')} % a.m. · início {MESES_FULL[e.mesInicio] || MESES_FULL[0]}
+                  </p>
+                </div>
+                <button
+                  onClick={() => updateData('emprestimos', (data.emprestimos || []).filter(item => item.id !== e.id))}
+                  className="text-slate-400 hover:text-red-400 transition text-sm"
+                  title="Excluir empréstimo"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {showModal && (
