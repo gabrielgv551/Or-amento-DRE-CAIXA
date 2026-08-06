@@ -99,13 +99,15 @@ export default function StepDreFluxo({ data, back, restart, className }) {
 
   const margemContribuicao = rol.map((v, i) => v - ads[i] - frete[i] - comissao[i])
 
+  const totalDespesasVariaveis = Array(12).fill(0).map((_, m) => ads[m] + frete[m] + comissao[m])
+
   const rows = [
     { label: 'ROB', values: receitaBrutaTotal, highlight: true },
     { label: 'Devoluções', values: devolucoes, sub: true },
     { label: 'Impostos', values: impostos, sub: true },
     { label: 'ROL', values: rol, highlight: true },
     { label: 'ROL% sobre ROB', values: rol.map((v, i) => receitaBrutaTotal[i] ? (v / receitaBrutaTotal[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
-    { label: 'Despesas Variáveis', values: Array(12).fill(0), header: true },
+    { label: 'Despesas Variáveis', values: totalDespesasVariaveis, header: true },
     { label: 'Ads', values: ads, sub: true },
     { label: 'Frete', values: frete, sub: true },
     { label: 'Comissão', values: comissao, sub: true },
