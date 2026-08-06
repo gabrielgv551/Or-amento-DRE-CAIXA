@@ -1,4 +1,43 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+
+function CurrencyInput({ value, onChange, className }) {
+  const [editing, setEditing] = useState(false)
+  const [raw, setRaw] = useState('')
+
+  useEffect(() => {
+    if (!editing) setRaw(value ? Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '')
+  }, [value, editing])
+
+  const handleFocus = () => {
+    setEditing(true)
+    setRaw(value ? String(Number(value)) : '')
+  }
+
+  const handleBlur = () => {
+    setEditing(false)
+    const num = parseFloat(String(raw).replace(/\./g, '').replace(',', '.')) || 0
+    onChange(num)
+  }
+
+  const handleChange = (e) => {
+    const v = e.target.value
+    setRaw(v)
+    const num = parseFloat(String(v).replace(/\./g, '').replace(',', '.')) || 0
+    onChange(num)
+  }
+
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      value={raw}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onChange={handleChange}
+      className={className}
+    />
+  )
+}
 
 export default function StepPremissasCaixa({ data, updateData, next, back, className }) {
   const premissas = data.premissasCaixa || {}
@@ -97,12 +136,9 @@ export default function StepPremissasCaixa({ data, updateData, next, back, class
             Saldo Inicial de Caixa
           </label>
           <div className="relative">
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={data.saldoInicial ?? ''}
-              onChange={e => updateData('saldoInicial', Number(e.target.value))}
+            <CurrencyInput
+              value={data.saldoInicial}
+              onChange={v => updateData('saldoInicial', v)}
               className={inputClass}
             />
           </div>
@@ -114,12 +150,9 @@ export default function StepPremissasCaixa({ data, updateData, next, back, class
             Saldo Inicial a Receber
           </label>
           <div className="relative">
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={premissas.saldoInicialReceber ?? ''}
-              onChange={e => update('saldoInicialReceber', Number(e.target.value))}
+            <CurrencyInput
+              value={premissas.saldoInicialReceber}
+              onChange={v => update('saldoInicialReceber', v)}
               className={inputClass}
             />
           </div>

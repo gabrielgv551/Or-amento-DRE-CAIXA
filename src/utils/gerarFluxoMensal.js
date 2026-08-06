@@ -108,6 +108,7 @@ export function gerarFluxoMensal(data) {
   const pmrShift = Math.round((Number(premissas.pmr) || 0) / 30)
   const vendasLiquidas = receitaBrutaTotal.map((v, i) => v - (Number(devolucao[i]) || 0))
   const recebimentosVendas = shiftArray(vendasLiquidas, pmrShift)
+  recebimentosVendas[0] += Number(premissas.saldoInicialReceber) || 0
 
   const pmpShift = Math.round((Number(premissas.pmp) || 0) / 30)
   const coberturaShift = Math.round((Number(premissas.coberturaEstoque) || 0) / 30)
