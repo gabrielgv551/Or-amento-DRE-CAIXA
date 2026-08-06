@@ -12,10 +12,13 @@ function parsePct(str) {
   return isNaN(n) ? 0 : n
 }
 
-function ValorCell({ value, bold, neg }) {
+function ValorCell({ value, bold, neg, highlight }) {
   const v = Number(value) || 0
   const cls = bold ? 'font-bold' : ''
-  const color = neg ? (v < 0 ? 'text-red-600' : 'text-emerald-600') : 'text-slate-700'
+  let color
+  if (highlight) color = 'text-white'
+  else if (neg) color = v < 0 ? 'text-red-600' : 'text-emerald-600'
+  else color = 'text-slate-700'
   return <td className={`px-2 py-2 text-right text-xs ${cls} ${color}`}>{fmtBRL(v)}</td>
 }
 
@@ -83,7 +86,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
   const margemContribuicao = rol.map((v, i) => v - ads[i] - frete[i] - comissao[i])
 
   const rows = [
-    { label: 'Receita Bruta', values: receitaBruta },
+    { label: 'ROB', values: receitaBruta, highlight: true },
     { label: 'Deduções dos canais', values: deducoes, sub: true },
     { label: 'ROL', values: rol, bold: true },
     { label: 'Despesas Variáveis', values: Array(12).fill(0), header: true },
@@ -128,14 +131,14 @@ export default function StepDreFluxo({ data, back, restart, className }) {
                 )
               }
               return (
-                <tr key={row.label} className={`border-t border-slate-200 ${idx % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'} ${row.bold ? 'bg-blue-50/50' : ''}`}>
-                  <td className={`sticky left-0 bg-inherit z-10 px-3 py-2 text-xs border-r border-slate-200 ${row.bold ? 'font-bold text-slate-900' : row.sub ? 'text-slate-500 pl-6' : 'font-semibold text-slate-700'}`}>
+                <tr key={row.label} className={`border-t border-slate-200 ${row.highlight ? 'bg-blue-900 text-white' : idx % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'} ${row.bold && !row.highlight ? 'bg-blue-50/50' : ''}`}>
+                  <td className={`sticky left-0 bg-inherit z-10 px-3 py-2 text-xs border-r border-slate-200 ${row.highlight ? 'font-bold text-white' : row.bold ? 'font-bold text-slate-900' : row.sub ? 'text-slate-500 pl-6' : 'font-semibold text-slate-700'}`}>
                     {row.label}
                   </td>
                   {row.values.map((v, i) => (
-                    <ValorCell key={i} value={v} bold={row.bold} neg={row.neg} />
+                    <ValorCell key={i} value={v} bold={row.bold} neg={row.neg} highlight={row.highlight} />
                   ))}
-                  <td className={`px-2 py-2 text-right text-xs border-l border-slate-200/50 ${row.bold ? 'font-bold text-slate-900' : 'text-slate-700'}`}>
+                  <td className={`px-2 py-2 text-right text-xs border-l border-slate-200/50 ${row.highlight ? 'font-bold text-white' : row.bold ? 'font-bold text-slate-900' : 'text-slate-700'}`}>
                     {fmtBRL(total)}
                   </td>
                 </tr>
