@@ -106,8 +106,7 @@ export default function App() {
     <StepFornecedores key={animKey} className={stepClass} {...stepProps} />,
     <StepDespesasFixas key={animKey} className={stepClass} {...stepProps} />,
     <StepDespesasFinanceiras key={animKey} className={stepClass} {...stepProps} />,
-    <StepNaoOperacional key={animKey} className={stepClass} {...stepProps} />,
-    <StepResultado key={animKey} className={stepClass} {...stepProps} />,
+    <StepDreFluxo key={animKey} className={stepClass} {...stepProps} />,
   ]
 
   return (
