@@ -39,6 +39,10 @@ function normalizeData(raw) {
     ...d,
     meses: Array.isArray(d.meses) ? d.meses : Array(12).fill(0),
   }))
+  data.outros = (data.outros || []).map(d => ({
+    ...d,
+    meses: Array.isArray(d.meses) ? d.meses : Array(12).fill(0),
+  }))
   return data
 }
 

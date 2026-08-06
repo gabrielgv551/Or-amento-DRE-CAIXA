@@ -280,6 +280,21 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
     })
   })
 
+  // ─── Pré-computa despesas financeiras mensais por dia ───────────────────────
+  const despesasFinanceirasPag = {}
+  for (let i = 1; i <= diasNoMes; i++) despesasFinanceirasPag[i] = []
+
+  const dfs = data.outros || []
+  dfs.forEach(despesa => {
+    const nome = despesa.nome || 'Despesa Financeira'
+    const valorMes = Number(despesa.meses?.[mesAtual]) || 0
+    if (valorMes <= 0 || diasUteisAtual.length === 0) return
+    const diario = valorMes / diasUteisAtual.length
+    diasUteisAtual.forEach(dia => {
+      despesasFinanceirasPag[dia.getDate()].push({ descricao: nome, valor: diario })
+    })
+  })
+
   // ─── Monta array diário ───────────────────────────────────────────────────
   const dias = []
   let saldoAcumulado = Number(data.saldoInicial) || 0
@@ -287,7 +302,7 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
   for (let d = 1; d <= diasNoMes; d++) {
     const saldoInicialDia = saldoAcumulado
     const entradas = [...entregas[d]]
-    const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || []), ...(devolucaoPag[d] || []), ...(despesasVariaveisPag[d] || []), ...(despesasFixasPag[d] || [])]
+    const saidas   = [...(fornecPag[d] || []), ...(impostosPag[d] || []), ...(devolucaoPag[d] || []), ...(despesasVariaveisPag[d] || []), ...(despesasFixasPag[d] || []), ...(despesasFinanceirasPag[d] || [])]
 
     data.dividas?.forEach(div => {
       if (Number(div.diaVencimento) === d && Number(div.parcela) > 0) {
@@ -295,11 +310,6 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
         const total = Number(div.parcela) + juros
         saidas.push({ descricao: (div.nome || 'Dívida') + (juros > 0 ? ' (+juros)' : ''), valor: total })
       }
-    })
-
-    data.outros?.forEach(o => {
-      if (Number(o.diaVencimento) === d && Number(o.valor) > 0)
-        saidas.push({ descricao: o.nome || 'Despesa Financeira', valor: Number(o.valor) })
     })
 
     const entradasNaoOp = []
