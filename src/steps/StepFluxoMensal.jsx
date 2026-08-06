@@ -30,10 +30,21 @@ export default function StepFluxoMensal({ data, updateData, back, restart, class
   const fluxo = useMemo(() => gerarFluxoMensal(data), [data])
 
   const [showModal, setShowModal] = useState(false)
-  const [form, setForm] = useState({ nome: '', principal: '', prazo: 12, taxa: '', mesInicio: 0 })
+  const [form, setForm] = useState({ id: null, nome: '', principal: '', prazo: 12, taxa: '', mesInicio: 0 })
 
-  const openModal = () => {
-    setForm({ nome: '', principal: '', prazo: 12, taxa: '', mesInicio: 0 })
+  const openModal = (item = null) => {
+    if (item) {
+      setForm({
+        id: item.id,
+        nome: item.nome || '',
+        principal: item.principal ? fmtBRL(item.principal) : '',
+        prazo: item.prazo || 12,
+        taxa: item.taxa ? Number(item.taxa).toLocaleString('pt-BR') : '',
+        mesInicio: item.mesInicio ?? 0,
+      })
+    } else {
+      setForm({ id: null, nome: '', principal: '', prazo: 12, taxa: '', mesInicio: 0 })
+    }
     setShowModal(true)
   }
   const closeModal = () => setShowModal(false)
@@ -46,10 +57,16 @@ export default function StepFluxoMensal({ data, updateData, back, restart, class
     const mesInicio = Math.max(0, Math.min(11, Number(form.mesInicio) || 0))
     if (principal <= 0) return
     const emprestimos = data.emprestimos || []
-    updateData('emprestimos', [
-      ...emprestimos,
-      { id: Date.now() + Math.random(), nome: form.nome || 'Empréstimo', principal, taxa, prazo, mesInicio },
-    ])
+    if (form.id) {
+      updateData('emprestimos', emprestimos.map(e =>
+        e.id === form.id ? { ...e, nome: form.nome || 'Empréstimo', principal, taxa, prazo, mesInicio } : e
+      ))
+    } else {
+      updateData('emprestimos', [
+        ...emprestimos,
+        { id: Date.now() + Math.random(), nome: form.nome || 'Empréstimo', principal, taxa, prazo, mesInicio },
+      ])
+    }
     closeModal()
   }
 
@@ -191,13 +208,22 @@ export default function StepFluxoMensal({ data, updateData, back, restart, class
                     {fmtBRL(e.principal)} · {e.prazo}x · {Number(e.taxa).toLocaleString('pt-BR')} % a.m. · início {MESES_FULL[e.mesInicio] || MESES_FULL[0]}
                   </p>
                 </div>
-                <button
-                  onClick={() => updateData('emprestimos', (data.emprestimos || []).filter(item => item.id !== e.id))}
-                  className="text-slate-400 hover:text-red-400 transition text-sm"
-                  title="Excluir empréstimo"
-                >
-                  ✕
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => openModal(e)}
+                    className="text-slate-400 hover:text-blue-500 transition text-sm"
+                    title="Editar empréstimo"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    onClick={() => updateData('emprestimos', (data.emprestimos || []).filter(item => item.id !== e.id))}
+                    className="text-slate-400 hover:text-red-400 transition text-sm"
+                    title="Excluir empréstimo"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -208,7 +234,7 @@ export default function StepFluxoMensal({ data, updateData, back, restart, class
         <>
           <div className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm" onClick={closeModal} />
           <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-2xl p-5 mx-4">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Tomar Empréstimo</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-4">{form.id ? 'Editar Empréstimo' : 'Tomar Empréstimo'}</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Nome</label>
