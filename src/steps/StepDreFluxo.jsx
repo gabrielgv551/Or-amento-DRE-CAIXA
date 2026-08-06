@@ -111,6 +111,13 @@ export default function StepDreFluxo({ data, back, restart, className }) {
 
   const totalDespesasVariaveis = Array(12).fill(0).map((_, m) => ads[m] + frete[m] + comissao[m])
 
+  const fixasRows = fixas.map(f => ({
+    label: f.nome || 'Despesa Fixa',
+    values: Array(12).fill(0).map((_, m) => Number((f.meses || [])[m]) || 0),
+    sub: true,
+    expense: true,
+  }))
+
   const rows = [
     { label: 'ROB', values: receitaBrutaTotal, highlight: true },
     { label: 'Devoluções', values: devolucoes, sub: true, expense: true },
@@ -125,7 +132,8 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     { label: 'Frete', values: frete, sub: true, expense: true },
     { label: 'Comissão', values: comissao, sub: true, expense: true },
     { label: 'Margem de Contribuição', values: margemContribuicao, bold: true },
-    { label: 'Despesas Fixas', values: despesasFixas, sub: true, expense: true },
+    { label: 'Despesas Fixas', values: despesasFixas, bold: true, expense: true },
+    ...fixasRows,
     { label: 'Despesas Financeiras', values: despesasFinanceiras, sub: true, expense: true },
     { label: 'Total de Despesas', values: totalDespesas, bold: true, expense: true },
     { label: 'Lucro Líquido', values: resultado, bold: true, neg: true },
