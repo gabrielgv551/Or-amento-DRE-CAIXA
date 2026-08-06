@@ -121,6 +121,20 @@ export default function StepDreFluxo({ data, back, restart, className }) {
   const ebitda = margemContribuicao.map((v, i) => v - despesasFixas[i])
   const lucroOperacional = ebitda.map((v, i) => v - despesasFinanceiras[i])
 
+  const regimeFiscal = data.regimeFiscal || 'lucroPresumido'
+
+  const irpj = Array(12).fill(0).map((_, i) => {
+    if (regimeFiscal === 'lucroReal') return Math.max(0, lucroOperacional[i]) * 0.15
+    return receitaBrutaTotal[i] * 0.012
+  })
+
+  const csll = Array(12).fill(0).map((_, i) => {
+    if (regimeFiscal === 'lucroReal') return Math.max(0, lucroOperacional[i]) * 0.09
+    return receitaBrutaTotal[i] * 0.0288
+  })
+
+  const lucroLiquido = lucroOperacional.map((v, i) => v - irpj[i] - csll[i])
+
   const rows = [
     { label: 'ROB', values: receitaBrutaTotal, highlight: true },
     { label: 'Devoluções', values: devolucoes, sub: true, expense: true },
@@ -144,7 +158,9 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     { label: 'Despesas Financeiras', values: despesasFinanceiras, sub: true, expense: true },
     { label: 'Lucro Operacional', values: lucroOperacional, highlight: true, bold: true },
     { label: 'Lucro Operacional % / ROL', values: lucroOperacional.map((v, i) => rol[i] ? (v / rol[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
-    { label: 'Lucro Líquido', values: resultado, bold: true, neg: true },
+    { label: 'IRPJ', values: irpj, sub: true, expense: true },
+    { label: 'CSLL', values: csll, sub: true, expense: true },
+    { label: 'Lucro Líquido', values: lucroLiquido, bold: true, neg: true },
   ]
 
   const totalRob = receitaBrutaTotal.reduce((s, v) => s + (Number(v) || 0), 0)

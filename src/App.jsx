@@ -5,6 +5,7 @@ import StepCustos from './steps/StepCustos'
 import StepFornecedores from './steps/StepFornecedores'
 import StepDespesasFixas from './steps/StepDespesasFixas'
 import StepDespesasFinanceiras from './steps/StepDespesasFinanceiras'
+import StepRegimeFiscal from './steps/StepRegimeFiscal'
 import StepDreFluxo from './steps/StepDreFluxo'
 import StepMargem from './steps/StepMargem'
 import StepDre from './steps/StepDre'
@@ -19,6 +20,7 @@ const STEPS = [
   'Despesas Variáveis',
   'Despesas Fixas',
   'Despesas Financeiras',
+  'Regime Fiscal',
   'DRE',
 ]
 
@@ -35,6 +37,7 @@ const initialData = {
   despesasVariaveis: { ads: {}, frete: {}, comissao: {} },
   despesasFixas: [],
   custos: {},
+  regimeFiscal: 'lucroPresumido',
 }
 
 function normalizeData(raw) {
@@ -119,6 +122,7 @@ export default function App() {
     <StepFornecedores key={animKey} className={stepClass} {...stepProps} />,
     <StepDespesasFixas key={animKey} className={stepClass} {...stepProps} />,
     <StepDespesasFinanceiras key={animKey} className={stepClass} {...stepProps} />,
+    <StepRegimeFiscal key={animKey} className={stepClass} {...stepProps} />,
     <StepDreFluxo key={animKey} className={stepClass} {...stepProps} />,
   ]
 
