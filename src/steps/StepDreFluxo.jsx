@@ -119,6 +119,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
   }))
 
   const ebitda = margemContribuicao.map((v, i) => v - despesasFixas[i])
+  const lucroOperacional = ebitda.map((v, i) => v - despesasFinanceiras[i])
 
   const rows = [
     { label: 'ROB', values: receitaBrutaTotal, highlight: true },
@@ -139,8 +140,10 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     { label: 'Despesas Fixas', values: despesasFixas, group: true, bold: true, expense: true },
     ...fixasRows,
     { label: 'EBITDA', values: ebitda, highlight: true, bold: true },
+    { label: 'EBITDA % / ROL', values: ebitda.map((v, i) => rol[i] ? (v / rol[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
     { label: 'Despesas Financeiras', values: despesasFinanceiras, sub: true, expense: true },
-    { label: 'Total de Despesas', values: totalDespesas, bold: true, expense: true },
+    { label: 'Lucro Operacional', values: lucroOperacional, highlight: true, bold: true },
+    { label: 'Lucro Operacional % / ROL', values: lucroOperacional.map((v, i) => rol[i] ? (v / rol[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
     { label: 'Lucro Líquido', values: resultado, bold: true, neg: true },
   ]
 
@@ -148,12 +151,16 @@ export default function StepDreFluxo({ data, back, restart, className }) {
   const totalRol = rol.reduce((s, v) => s + (Number(v) || 0), 0)
   const totalMargemBruta = margemBruta.reduce((s, v) => s + (Number(v) || 0), 0)
   const totalMargemContribuicao = margemContribuicao.reduce((s, v) => s + (Number(v) || 0), 0)
+  const totalEbitda = ebitda.reduce((s, v) => s + (Number(v) || 0), 0)
+  const totalLucroOperacional = lucroOperacional.reduce((s, v) => s + (Number(v) || 0), 0)
 
   const computeTotal = (row) => {
     if (row.suffix === '%') {
       if (row.label === 'ROL% sobre ROB') return totalRob ? (totalRol / totalRob) * 100 : 0
       if (row.label === 'Margem Bruta % / ROL') return totalRol ? (totalMargemBruta / totalRol) * 100 : 0
       if (row.label === 'Margem de Contribuição % / ROL') return totalRol ? (totalMargemContribuicao / totalRol) * 100 : 0
+      if (row.label === 'EBITDA % / ROL') return totalRol ? (totalEbitda / totalRol) * 100 : 0
+      if (row.label === 'Lucro Operacional % / ROL') return totalRol ? (totalLucroOperacional / totalRol) * 100 : 0
       return 0
     }
     return row.values.reduce((s, v) => s + (Number(v) || 0), 0)
