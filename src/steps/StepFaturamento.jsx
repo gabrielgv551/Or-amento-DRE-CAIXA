@@ -3,18 +3,21 @@ import React, { useRef } from 'react'
 const MESES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 const MESES_FULL  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
+const ANO_ATUAL = new Date().getFullYear()
+
+const DIAS_POR_MES = Array(12).fill(0).map((_, i) => new Date(ANO_ATUAL, i + 1, 0).getDate())
+
 const SUGESTOES = [
-  { nome: 'Mercado Livre',    deducao: '17', leadTime: '14' },
-  { nome: 'Shopee',           deducao: '20', leadTime: '14' },
-  { nome: 'Amazon',           deducao: '15', leadTime: '21' },
-  { nome: 'Site Próprio',     deducao: '3',  leadTime: '1'  },
-  { nome: 'Loja Física',      deducao: '0',  leadTime: '0'  },
+  { nome: 'Mercado Livre', leadTime: '14' },
+  { nome: 'Shopee',      leadTime: '14' },
+  { nome: 'Amazon',      leadTime: '21' },
+  { nome: 'Site Próprio', leadTime: '1'  },
+  { nome: 'Loja Física', leadTime: '0'  },
 ]
 
-const emptyCanal = (nome = '', deducao = '0', leadTime = '14') => ({
+const emptyCanal = (nome = '', leadTime = '14') => ({
   id: Date.now() + Math.random(),
   nome,
-  deducao,
   leadTime,
   aliquota: '0',
   meses: Array(12).fill(0),
@@ -76,8 +79,8 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
   const canais      = data.canais || []
   const visibleMeses = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
-  const addCanal = (nome = '', deducao = '0', leadTime = '14') =>
-    updateData('canais', [...canais, emptyCanal(nome, deducao, leadTime)])
+  const addCanal = (nome = '', leadTime = '14') =>
+    updateData('canais', [...canais, emptyCanal(nome, leadTime)])
 
   const removeCanal = (id) =>
     updateData('canais', canais.filter(c => c.id !== id))
@@ -95,14 +98,32 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
 
   const totalCanal = (canal) => canal.meses.reduce((s, v) => s + (Number(v) || 0), 0)
 
-  const changeTotalAno = (id, total) => {
-    const base = Math.floor(total / 12)
-    const resto = total - base * 12
-    const meses = Array(12).fill(base).map((v, i) => (i < resto ? v + 1 : v))
+  const vendasDiariasCanal = (canal) => {
+    const totalDias = DIAS_POR_MES.reduce((s, d) => s + d, 0)
+    if (totalDias <= 0) return 0
+    return totalCanal(canal) / totalDias
+  }
+
+  const changeVendasDiarias = (id, valorDiario) => {
     updateData('canais', canais.map(c => {
       if (c.id !== id) return c
+      const meses = DIAS_POR_MES.map(d => Math.round(valorDiario * d))
       return { ...c, meses }
     }))
+  }
+
+  const crescimentoCanal = (canal) => {
+    return canal.meses.map((v, i) => {
+      if (i === 0) return 0
+      const anterior = Number(canal.meses[i - 1]) || 0
+      const atual = Number(v) || 0
+      if (anterior === 0) return 0
+      return ((atual - anterior) / anterior) * 100
+    })
+  }
+
+  const fmtPercent = (v) => {
+    return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%'
   }
 
   const jaAdicionado = (nome) => canais.some(c => c.nome === nome)
@@ -166,7 +187,7 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
         {SUGESTOES.map(s => (
           <button
             key={s.nome}
-            onClick={() => !jaAdicionado(s.nome) && addCanal(s.nome, s.deducao, s.leadTime)}
+            onClick={() => !jaAdicionado(s.nome) && addCanal(s.nome, s.leadTime)}
             disabled={jaAdicionado(s.nome)}
             className={`text-xs px-3 py-1.5 rounded-full border transition font-medium ${
               jaAdicionado(s.nome)
@@ -194,13 +215,10 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                 Canal
               </th>
               <th className="text-center px-2 py-2.5 font-semibold min-w-[72px] border-r border-blue-500 text-white bg-blue-600">
-                Ded. (%)
-              </th>
-              <th className="text-center px-2 py-2.5 font-semibold min-w-[72px] border-r border-blue-500 text-white bg-blue-600">
                 Dias p/<br />receber
               </th>
               <th className="text-center px-2 py-2.5 font-semibold min-w-[100px] border-r border-blue-500 text-white bg-blue-600">
-                Total do<br />Ano
+                Vendas<br />Diárias
               </th>
               {visibleMeses.map((i, col) => (
                 <th
@@ -218,7 +236,7 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
           <tbody>
             {canais.length === 0 && (
               <tr>
-                <td colSpan={visibleMeses.length + 5} className="text-center py-10 text-slate-400 text-sm">
+                <td colSpan={visibleMeses.length + 4} className="text-center py-10 text-slate-400 text-sm">
                   Adicione canais usando os botões acima
                 </td>
               </tr>
@@ -239,20 +257,6 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                   />
                 </td>
 
-                {/* Dedução % */}
-                <td className="px-2 py-1.5 border-r border-slate-200">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={canal.deducao}
-                      onChange={e => changeCanal(canal.id, 'deducao', e.target.value)}
-                      className="w-full bg-transparent border border-transparent hover:border-slate-200 focus:border-blue-500 focus:bg-slate-100 rounded px-2 pr-5 py-1 text-slate-900 text-xs text-center focus:outline-none transition"
-                    />
-                    <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">%</span>
-                  </div>
-                </td>
-
                 {/* Lead time */}
                 <td className="px-2 py-1.5 border-r border-slate-200">
                   <input
@@ -264,11 +268,11 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
                   />
                 </td>
 
-                {/* Total do ano */}
+                {/* Vendas diárias */}
                 <td className="px-2 py-1.5 border-r border-slate-200">
                   <MoneyCell
-                    value={totalCanal(canal)}
-                    onChange={v => changeTotalAno(canal.id, v)}
+                    value={vendasDiariasCanal(canal)}
+                    onChange={v => changeVendasDiarias(canal.id, v)}
                   />
                 </td>
 
@@ -304,6 +308,66 @@ export default function StepFaturamento({ data, updateData, next, back, classNam
         <div className="mt-3 flex gap-3 flex-wrap text-xs text-slate-400">
           <span>· Clique em qualquer célula para editar</span>
         </div>
+      )}
+
+      {/* Crescimento mensal por canal */}
+      {canais.length > 0 && (
+        <>
+          <div className="text-center mb-4 mt-10">
+            <div className="text-3xl mb-2">📈</div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-1">Crescimento Mensal por Canal</h2>
+            <p className="text-slate-500 text-sm">Variação percentual do faturamento mês a mês</p>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white mb-4">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-slate-100 text-slate-700 text-xs">
+                  <th className="text-left px-3 py-2.5 font-semibold sticky left-0 bg-blue-600 z-10 min-w-[160px] border-r border-blue-500 text-white">
+                    Canal
+                  </th>
+                  {visibleMeses.map((i, col) => (
+                    <th
+                      key={i}
+                      className={`text-center px-1 py-2.5 font-semibold min-w-[120px] bg-blue-600 text-white ${
+                        col < visibleMeses.length - 1 ? 'border-r border-blue-500' : ''
+                      }`}
+                    >
+                      {MESES_FULL[i]}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {canais.map((canal, rowIdx) => {
+                  const crescimento = crescimentoCanal(canal)
+                  return (
+                    <tr
+                      key={canal.id}
+                      className={`border-t border-slate-200 ${rowIdx % 2 === 0 ? 'bg-slate-50/50' : 'bg-slate-50/30'} hover:bg-slate-100 transition`}
+                    >
+                      <td className="px-2 py-1.5 sticky left-0 bg-inherit z-10 border-r border-slate-200">
+                        <span className="text-xs font-medium text-slate-700">{canal.nome}</span>
+                      </td>
+                      {visibleMeses.map((mesIdx, col) => {
+                        const v = crescimento[mesIdx]
+                        const color = v > 0 ? 'text-emerald-600' : v < 0 ? 'text-rose-600' : 'text-slate-500'
+                        return (
+                          <td
+                            key={mesIdx}
+                            className={`px-1 py-1 text-center text-xs font-medium ${color} ${col < visibleMeses.length - 1 ? 'border-r border-slate-200/50' : ''}`}
+                          >
+                            {v > 0 ? '+' : ''}{fmtPercent(v)}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {/* Devolução table */}
