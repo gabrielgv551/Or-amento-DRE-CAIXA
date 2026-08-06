@@ -92,6 +92,23 @@ export default function StepPremissasCaixa({ data, updateData, next, back, class
 
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-md">
           <label className="block text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
+            Saldo Inicial a Receber
+          </label>
+          <div className="relative">
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={premissas.saldoInicialReceber ?? ''}
+              onChange={e => update('saldoInicialReceber', Number(e.target.value))}
+              className={inputClass}
+            />
+          </div>
+          <p className="mt-2 text-xs text-slate-400">Contas a receber pendentes no início do período</p>
+        </div>
+
+        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-md">
+          <label className="block text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
             Recolhimento de Impostos
           </label>
           <select
