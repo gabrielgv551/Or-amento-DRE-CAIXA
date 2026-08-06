@@ -41,8 +41,6 @@ export default function StepFluxoMensal({ data, back, restart, className }) {
     { label: 'ATIVIDADES NÃO OPERACIONAIS', header: true },
     { label: 'Receitas Financeiras', values: fluxo.receitasFinanceirasMes, sub: true },
     { label: 'Despesas Financeiras', values: fluxo.despesasFinanceirasMes, sub: true, expense: true },
-    { label: 'Entradas Não Operacionais', values: fluxo.entradasNaoOp, sub: true },
-    { label: 'Saídas Não Operacionais', values: fluxo.saidasNaoOp, sub: true, expense: true },
     { label: 'Total Não Operacional', values: fluxo.totalNaoOperacional, group: true, bold: true },
     { label: 'SALDO DO MÊS', values: fluxo.saldoMes, highlight: true, bold: true },
     { label: 'SALDO FINAL DO CAIXA', values: fluxo.saldoFinal, highlight: true, bold: true },
@@ -117,9 +115,10 @@ export default function StepFluxoMensal({ data, back, restart, className }) {
               }
               const total = (row.values || []).reduce((s, v) => s + (Number(v) || 0), 0)
               const displayValue = (v) => (row.expense ? -v : v)
+              const rowBg = row.highlight ? 'bg-blue-900 text-white' : row.group ? 'bg-blue-100' : idx % 2 === 0 ? 'bg-slate-50' : 'bg-white'
               return (
-                <tr key={row.label} className={`border-t border-slate-200 ${row.highlight ? 'bg-blue-900 text-white' : idx % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'} ${row.group ? 'bg-blue-100' : ''}`}>
-                  <td className={`sticky left-0 bg-inherit z-10 px-3 py-2 text-xs border-r border-slate-200 ${row.highlight ? 'font-bold text-white' : row.bold ? 'font-bold text-slate-900' : row.sub ? 'text-slate-500 pl-6' : 'font-semibold text-slate-700'}`}>
+                <tr key={row.label} className={`border-t border-slate-200 ${rowBg}`}>
+                  <td className={`sticky left-0 z-10 px-3 py-2 text-xs border-r border-slate-200 ${rowBg} ${row.highlight ? 'font-bold text-white' : row.bold ? 'font-bold text-slate-900' : row.sub ? 'text-slate-500 pl-6' : 'font-semibold text-slate-700'}`}>
                     {row.label}
                   </td>
                   {(row.values || []).map((v, i) => (
