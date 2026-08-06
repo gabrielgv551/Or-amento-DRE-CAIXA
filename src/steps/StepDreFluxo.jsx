@@ -28,10 +28,17 @@ export default function StepDreFluxo({ data, back, restart, className }) {
   const fixas = data.despesasFixas || []
   const financeiras = data.outros || []
   const pessoal = Number(data.pessoal?.total) || 0
+  const receitasFinanceiras = data.receitasFinanceiras || []
 
   const receitaBruta = Array(12).fill(0).map((_, m) =>
     canais.reduce((s, c) => s + (Number(c.meses?.[m]) || 0), 0)
   )
+
+  const receitasFinanceirasMes = Array(12).fill(0).map((_, m) =>
+    receitasFinanceiras.reduce((s, f) => s + (Number((f.meses || [])[m]) || 0), 0)
+  )
+
+  const receitaBrutaTotal = receitaBruta.map((v, i) => v + receitasFinanceirasMes[i])
 
   const deducoes = Array(12).fill(0).map((_, m) =>
     canais.reduce((s, c) => {
@@ -41,7 +48,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     }, 0)
   )
 
-  const rol = receitaBruta.map((v, i) => v - deducoes[i])
+  const rol = receitaBrutaTotal.map((v, i) => v - deducoes[i])
 
   const ads = Array(12).fill(0).map((_, m) =>
     canais.reduce((s, c) => {
@@ -78,7 +85,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
   const despesasPessoal = Array(12).fill(pessoal)
 
   const totalDespesas = Array(12).fill(0).map((_, m) =>
-    ads[m] + frete[m] + comissao[m] + despesasFixas[m] + despesasFinanceiras[m] + despesasPessoal[m]
+    ads[m] + frete[m] + comissao[m] + despesasFixas[m] + despesasFinanceiras[m]
   )
 
   const resultado = rol.map((v, i) => v - totalDespesas[i])
@@ -86,7 +93,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
   const margemContribuicao = rol.map((v, i) => v - ads[i] - frete[i] - comissao[i])
 
   const rows = [
-    { label: 'ROB', values: receitaBruta, highlight: true },
+    { label: 'ROB', values: receitaBrutaTotal, highlight: true },
     { label: 'Deduções dos canais', values: deducoes, sub: true },
     { label: 'ROL', values: rol, bold: true },
     { label: 'Despesas Variáveis', values: Array(12).fill(0), header: true },
@@ -96,7 +103,6 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     { label: 'Margem de Contribuição', values: margemContribuicao, bold: true },
     { label: 'Despesas Fixas', values: despesasFixas, sub: true },
     { label: 'Despesas Financeiras', values: despesasFinanceiras, sub: true },
-    { label: 'Pessoal', values: despesasPessoal, sub: true },
     { label: 'Total de Despesas', values: totalDespesas, bold: true },
     { label: 'Resultado', values: resultado, bold: true, neg: true },
   ]
