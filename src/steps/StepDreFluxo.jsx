@@ -80,6 +80,8 @@ export default function StepDreFluxo({ data, back, restart, className }) {
 
   const resultado = rol.map((v, i) => v - totalDespesas[i])
 
+  const margemContribuicao = rol.map((v, i) => v - ads[i] - frete[i] - comissao[i])
+
   const rows = [
     { label: 'Receita Bruta', values: receitaBruta },
     { label: 'Deduções dos canais', values: deducoes, sub: true },
@@ -88,6 +90,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     { label: 'Ads', values: ads, sub: true },
     { label: 'Frete', values: frete, sub: true },
     { label: 'Comissão', values: comissao, sub: true },
+    { label: 'Margem de Contribuição', values: margemContribuicao, bold: true },
     { label: 'Despesas Fixas', values: despesasFixas, sub: true },
     { label: 'Despesas Financeiras', values: despesasFinanceiras, sub: true },
     { label: 'Pessoal', values: despesasPessoal, sub: true },

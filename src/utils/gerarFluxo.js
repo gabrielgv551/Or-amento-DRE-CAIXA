@@ -172,6 +172,21 @@ export function gerarFluxoDiario(data, { targetMes, targetAno } = {}) {
     }
   })
 
+  // ─── Pré-computa receitas financeiras mensais por dia ───────────────────────
+  const receitasFinanceirasPag = {}
+  for (let i = 1; i <= diasNoMes; i++) receitasFinanceirasPag[i] = []
+
+  const rf = data.receitasFinanceiras || []
+  rf.forEach(receita => {
+    const nome = receita.nome || 'Receita Financeira'
+    const valorMes = Number(receita.meses?.[mesAtual]) || 0
+    if (valorMes <= 0 || diasUteisAtual.length === 0) return
+    const diario = valorMes / diasUteisAtual.length
+    diasUteisAtual.forEach(dia => {
+      receitasFinanceirasPag[dia.getDate()].push({ descricao: nome, valor: diario })
+    })
+  })
+
   // ─── Pré-computa impostos por dia ───────────────────────────────────────────
   const impostosPag = {}
   for (let i = 1; i <= diasNoMes; i++) impostosPag[i] = []
