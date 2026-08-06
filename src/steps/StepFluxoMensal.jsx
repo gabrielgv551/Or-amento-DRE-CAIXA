@@ -1,8 +1,20 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { gerarFluxoMensal } from '../utils/gerarFluxoMensal'
 
 const MESES_FULL = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+
+function parseBRL(str) {
+  if (str === '' || str === undefined || str === null) return 0
+  const s = String(str).replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '')
+  return parseFloat(s) || 0
+}
+
+function fmtBRL(v) {
+  if (!v) return ''
+  return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+}
+
 
 function brl(v) {
   return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -14,8 +26,33 @@ function NumCell({ value, bold, negColor }) {
   return <td className={`px-2 py-2 text-right text-xs ${bold ? 'font-bold' : ''} ${negColor ? color : 'text-slate-700'}`}>{brl(n)}</td>
 }
 
-export default function StepFluxoMensal({ data, back, restart, className }) {
+export default function StepFluxoMensal({ data, updateData, back, restart, className }) {
   const fluxo = useMemo(() => gerarFluxoMensal(data), [data])
+
+  const [showModal, setShowModal] = useState(false)
+  const [form, setForm] = useState({ nome: '', principal: '', prazo: 12, taxa: '', mesInicio: 0 })
+
+  const openModal = () => {
+    setForm({ nome: '', principal: '', prazo: 12, taxa: '', mesInicio: 0 })
+    setShowModal(true)
+  }
+  const closeModal = () => setShowModal(false)
+  const updateForm = (field, value) => setForm(prev => ({ ...prev, [field]: value }))
+
+  const handleSave = () => {
+    const principal = parseBRL(form.principal)
+    const taxa = Number(String(form.taxa).replace(',', '.')) || 0
+    const prazo = Math.max(1, Number(form.prazo) || 1)
+    const mesInicio = Math.max(0, Math.min(11, Number(form.mesInicio) || 0))
+    if (principal <= 0) return
+    const emprestimos = data.emprestimos || []
+    updateData('emprestimos', [
+      ...emprestimos,
+      { id: Date.now() + Math.random(), nome: form.nome || 'Empréstimo', principal, taxa, prazo, mesInicio },
+    ])
+    closeModal()
+  }
+
 
   const totalEntradas = fluxo.entradasOperacionais.map((v, i) => v + fluxo.entradasNaoOp[i])
   const totalSaidas = fluxo.saidasOperacionais.map((v, i) => v + fluxo.saidasNaoOp[i])
@@ -134,6 +171,95 @@ export default function StepFluxoMensal({ data, back, restart, className }) {
         <button onClick={handleExportExcel} className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/20 text-sm">📥 Excel</button>
         <button onClick={restart} className="flex-[2] bg-blue-500 hover:bg-blue-400 text-slate-900 font-bold py-3 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20 text-sm">🔄 Recomeçar</button>
       </div>
+
+      <div className="max-w-lg mx-auto mt-3">
+        <button
+          onClick={openModal}
+          className="w-full py-3 rounded-xl border border-dashed border-blue-400 text-blue-600 hover:bg-blue-50 hover:border-blue-500 transition font-medium text-sm"
+        >
+          + Tomar Empréstimo
+        </button>
+      </div>
+
+      {showModal && (
+        <>
+          <div className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm" onClick={closeModal} />
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-2xl p-5 mx-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Tomar Empréstimo</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Nome</label>
+                <input
+                  type="text"
+                  value={form.nome}
+                  onChange={e => updateForm('nome', e.target.value)}
+                  placeholder="Ex: Empréstimo bancário"
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Valor do empréstimo</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-xs text-slate-400">R$</span>
+                    <input
+                      type="text"
+                      value={form.principal}
+                      onChange={e => updateForm('principal', e.target.value)}
+                      placeholder="0,00"
+                      className="w-full border border-slate-200 rounded-lg pl-8 pr-3 py-2 text-sm text-right focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Parcelas</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="12"
+                    value={form.prazo}
+                    onChange={e => updateForm('prazo', e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Taxa de juros mensal</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={form.taxa}
+                      onChange={e => updateForm('taxa', e.target.value)}
+                      placeholder="0,00"
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-right focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    />
+                    <span className="absolute right-3 top-2 text-xs text-slate-400">%</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Mês da tomada</label>
+                  <select
+                    value={form.mesInicio}
+                    onChange={e => updateForm('mesInicio', Number(e.target.value))}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+                  >
+                    {MESES_FULL.map((m, i) => <option key={m} value={i}>{m}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={closeModal} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 transition font-medium text-sm">
+                Cancelar
+              </button>
+              <button onClick={handleSave} className="flex-[2] bg-blue-500 hover:bg-blue-400 text-slate-900 font-bold py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20 text-sm">
+                Salvar empréstimo
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
