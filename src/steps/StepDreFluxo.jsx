@@ -126,18 +126,35 @@ export default function StepDreFluxo({ data, back, restart, className }) {
     { label: 'ROL% sobre ROB', values: rol.map((v, i) => receitaBrutaTotal[i] ? (v / receitaBrutaTotal[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
     { label: 'Custos', values: cmv, costTotal: true, expense: true },
     { label: 'CMV', values: cmv, sub: true, expense: true },
-    { label: 'Margem Bruta', values: margemBruta, bold: true },
+    { label: 'Margem Bruta', values: margemBruta, highlight: true, bold: true },
+    { label: 'Margem Bruta % / ROL', values: margemBruta.map((v, i) => rol[i] ? (v / rol[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
     { label: 'Despesas Variáveis', values: totalDespesasVariaveis, bold: true, expense: true },
     { label: 'Ads', values: ads, sub: true, expense: true },
     { label: 'Frete', values: frete, sub: true, expense: true },
     { label: 'Comissão', values: comissao, sub: true, expense: true },
-    { label: 'Margem de Contribuição', values: margemContribuicao, bold: true },
+    { label: 'Margem de Contribuição', values: margemContribuicao, highlight: true, bold: true },
+    { label: 'Margem de Contribuição % / ROL', values: margemContribuicao.map((v, i) => rol[i] ? (v / rol[i]) * 100 : 0), sub: true, italic: true, suffix: '%' },
     { label: 'Despesas Fixas', values: despesasFixas, bold: true, expense: true },
     ...fixasRows,
     { label: 'Despesas Financeiras', values: despesasFinanceiras, sub: true, expense: true },
     { label: 'Total de Despesas', values: totalDespesas, bold: true, expense: true },
     { label: 'Lucro Líquido', values: resultado, bold: true, neg: true },
   ]
+
+  const totalRob = receitaBrutaTotal.reduce((s, v) => s + (Number(v) || 0), 0)
+  const totalRol = rol.reduce((s, v) => s + (Number(v) || 0), 0)
+  const totalMargemBruta = margemBruta.reduce((s, v) => s + (Number(v) || 0), 0)
+  const totalMargemContribuicao = margemContribuicao.reduce((s, v) => s + (Number(v) || 0), 0)
+
+  const computeTotal = (row) => {
+    if (row.suffix === '%') {
+      if (row.label === 'ROL% sobre ROB') return totalRob ? (totalRol / totalRob) * 100 : 0
+      if (row.label === 'Margem Bruta % / ROL') return totalRol ? (totalMargemBruta / totalRol) * 100 : 0
+      if (row.label === 'Margem de Contribuição % / ROL') return totalRol ? (totalMargemContribuicao / totalRol) * 100 : 0
+      return 0
+    }
+    return row.values.reduce((s, v) => s + (Number(v) || 0), 0)
+  }
 
   return (
     <div className={`w-full max-w-[98vw] px-2 ${className}`}>
@@ -160,11 +177,7 @@ export default function StepDreFluxo({ data, back, restart, className }) {
           </thead>
           <tbody>
             {rows.map((row, idx) => {
-              const totalRob = receitaBrutaTotal.reduce((s, v) => s + (Number(v) || 0), 0)
-              const totalRol = rol.reduce((s, v) => s + (Number(v) || 0), 0)
-              const total = row.suffix === '%'
-                ? (totalRob ? (totalRol / totalRob) * 100 : 0)
-                : row.values.reduce((s, v) => s + (Number(v) || 0), 0)
+              const total = computeTotal(row)
               if (row.header) {
                 return (
                   <tr key={row.label} className="bg-blue-100">
