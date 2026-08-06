@@ -171,8 +171,8 @@ export default function App() {
           </div>
         </>
       )}
-      {mode === 'fluxo' && step > 0 && step < STEPS.length - 1 && (
-        <ProgressBar current={step} total={STEPS.length - 2} labels={STEPS.slice(1, -1)} />
+      {mode === 'fluxo' && step > 0 && step < STEPS.length && (
+        <ProgressBar current={step} total={STEPS.length - 1} labels={STEPS.slice(1)} />
       )}
       <div className="flex-1 flex items-center justify-center p-4">
         {mode === 'fluxo' ? (
